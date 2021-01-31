@@ -1,0 +1,1 @@
+/usr/bin/c++   -pthread  -rdynamic CMakeFiles/dfa.dir/optimization.cpp.o  -o dfa 
