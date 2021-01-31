@@ -65,12 +65,24 @@ void load_file(string filePath)
 
         dfa.push_back(row);
     }
-    // for (auto thing: entries)
-    // {
-    //     cout << thing << " ";
-    // }
-
     inputFile.close();
+}
+
+void saveFile(string filePath)
+{
+    ofstream outputFile;
+    cout << "Saving to " << filePath << endl;
+    outputFile.open(filePath);
+    for (auto row : dfa)
+    {
+        for (auto entry : row)
+        {
+            outputFile << entry;
+            outputFile << " ";
+        }
+        outputFile << endl;
+    }
+    outputFile.close();
 }
 
 void printDFA()
@@ -85,41 +97,40 @@ void printDFA()
     }
 }
 
-void  printL()
+void printL()
 {
-    for (Grouping group: L)
+    for (Grouping group : L)
     {
         cout << "----------------------------------" << endl;
         cout << "States {";
-        for (auto state: group.states)
+        for (auto state : group.states)
         {
             cout << state << " ";
         }
         cout << "} ";
         cout << "Alphabet {";
-        for (auto letter: group.alphabet)
+        for (auto letter : group.alphabet)
         {
             cout << letter << " ";
         }
         cout << "} " << endl;
     }
-    cout << "--------------------------------"  << endl;
-
+    cout << "--------------------------------" << endl;
 }
 
 void printM()
 {
-        for (auto set: M)
+    for (auto set : M)
     {
         cout << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
         cout << "States {";
-        for (auto state: set)
+        for (auto state : set)
         {
             cout << state << " ";
         }
         cout << "} " << endl;
-      }
-    cout << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"  << endl;
+    }
+    cout << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
 }
 
 void initialize()
@@ -149,31 +160,48 @@ void initialize()
     L.insert(L.begin(), nonAcceptingStates);
 }
 
-void merging()
+void merging(vector<vector<string>> &dfa)
 {
-    cout << "SB " << dfa.size() << endl;
-    cout << "M: " << M.size() << endl;
+    cout << "Initial Size " << dfa.size() << endl;
+    // cout << "M: " << M.size() << endl;
     // Merge things...
     for (vector<int> subset : M)
     {
-        dfa.erase(dfa.begin() + (subset[1] - 1));
-        cout << "SA " << dfa.size() << subset[1] -1 << endl;
-
-        for (auto row : dfa)
+        for (int i = 0; i < dfa.size(); i++)
         {
-            for (int i = 2; i < row.size(); i++)
+            auto row = dfa[i];
+            if (stoi(row[1]) == subset[1])
             {
-                // cout << "Element " << row[i] << endl;
-                if (row[i] != "E")
+                cout << "Deletig " << subset[1] << endl;
+                cout << "New Size " << dfa.size() << endl;
+
+                dfa.erase(dfa.begin() + i);
+            }
+        }
+    }
+
+    for (vector<int> subset : M)
+    {
+        for (int i = 0; i < dfa.size(); i++)
+        {
+            auto &row = dfa[i];
+
+            for (int j = 2; j < row.size(); j++)
+            {
+                if (row[j] != "E")
                 {
-                    if (stoi(row[i]) == subset[1])
+                    if (stoi(row[j]) == subset[1])
                     {
-                        subset[1] = subset[0];
+                        cout << "Replaced " << row[j];
+
+                        row[j] = to_string(subset[0]);
+                        cout << " with " << row[j] << endl;
                     }
                 }
             }
         }
     }
+    M.clear();
 }
 
 void seg()
@@ -182,9 +210,8 @@ void seg()
     L.erase(L.begin());
     vector<int> states = potential.states;
     vector<int> alphabet = potential.alphabet;
-    cout << "Top poped" << endl;
+    // cout << "Top poped" << endl;
     // cout << "Alph len " << alphabet.size() << endl;
-
 
     // Iterate over every row in dfa if its in states and see if its column (c)
     // has an entry
@@ -203,7 +230,17 @@ void seg()
     for (int state : states)
     {
         // cout << "State.." << state << endl;
-        vector<string> row = dfa[state];
+        // Get Row
+        vector<string> row;
+        for (auto list : dfa)
+        {
+            if (stoi(list[1]) == state)
+            {
+                row = list;
+                break;
+            }
+        }
+        // vector<string> row = dfa[state];
         if (row[letter] == "E")
         {
             // cout << "Error transition" << endl;
@@ -212,13 +249,13 @@ void seg()
         }
         else
         {
-            // cout << "Valid Transition..." << pastMatches.size() << endl;
+            cout << "Valid Transition..." << row[letter] << endl;
             bool seen = false;
             for (matches &match : pastMatches)
             {
                 if (match.id == stoi(row[letter]))
                 {
-                    // cout << "Seen before ... " << match.id << " " << row[letter] << endl;
+                    cout << "Seen before ... " << match.id << " " << row[letter] << endl;
                     match.stateIds.push_back(state);
                     seen = true;
                     // cout << "match len " << match.stateIds.size() << endl;
@@ -228,7 +265,7 @@ void seg()
             }
             if (!seen)
             {
-                // cout << "Not seen before " << row[letter] << endl;
+                cout << "Not seen before " << row[letter] << endl;
                 matches newMatch;
                 newMatch.id = stoi(row[letter]);
                 newMatch.stateIds.push_back(state);
@@ -240,20 +277,20 @@ void seg()
     // For all partitions Xi (transitions, nonTransistions)
     for (matches partition : pastMatches)
     {
-        cout << "PARTITION:" << endl;
-        cout << partition.id << endl;
-        cout << partition.stateIds.size() << endl;
+        // cout << "PARTITION:" << endl;
+        // cout << partition.id << endl;
+        // cout << partition.stateIds.size() << endl;
         if (partition.stateIds.size() > 1)
         {
             // cout << "Greater " << endl;
             if (alphabet.size() == 0)
             {
-                cout << "Alphabet size 0" << endl;
-                for (auto id: partition.stateIds)
-                {
-                    cout << id << " ";
-                }
-                cout << endl;
+                // cout << "Alphabet size 0" << endl;
+                // for (auto id : partition.stateIds)
+                // {
+                //     cout << id << " ";
+                // }
+                // cout << endl;
                 // add S to M
                 cout << "Addind to M" << endl;
                 M.push_back(partition.stateIds);
@@ -265,18 +302,18 @@ void seg()
                 Grouping temp;
                 temp.states = partition.stateIds;
                 temp.alphabet = alphabet;
-                cout << "//////////////////////  SET {} ";
-                for (auto state: temp.states)
-                {
-                    cout << state << " ";
-                }
-                cout << endl;
-                cout << "ALPHA {} ";
-                for (auto letter: alphabet)
-                {
-                    cout << letter << " ";
-                } 
-                cout << "/////////////////////////" << endl;
+                // cout << "//////////////////////  SET {} ";
+                // for (auto state : temp.states)
+                // {
+                //     // cout << state << " ";
+                // }
+                // cout << endl;
+                // cout << "ALPHA {} ";
+                // for (auto letter : alphabet)
+                // {
+                //     cout << letter << " ";
+                // }
+                // cout << "/////////////////////////" << endl;
                 L.insert(L.begin(), temp);
                 printL();
             }
@@ -295,12 +332,11 @@ void seg()
         }
         else
         {
-                cout << "Alphabet ii size 0" << endl;
-                        // add S to M
-                cout << "Addind to M" << endl;
-                M.push_back(notTransitions);
-                printM();
-
+            // cout << "Alphabet ii size 0" << endl;
+            // add S to M
+            cout << "Addind to M" << endl;
+            M.push_back(notTransitions);
+            printM();
         }
     }
 
@@ -318,14 +354,36 @@ int main(int argc, char **argv)
              << endl;
         exit(1);
     }
-    load_file(argv[1]);
-    printDFA();
-    initialize();
-    while (!L.empty())
+    string inputFile = argv[1];
+    load_file(inputFile);
+
+    int lastSize = dfa.size();
+    int currentSize = 0;
+    // printDFA();
+    int counter = 0;
+    while (lastSize != currentSize)
+    // for (int i = 0; i < 2; i++)
     {
-        seg();
-        cout << "Run.." << endl;
+        counter++;
+        printDFA();
+        initialize();
+        printL();
+        cout << "fffffffffffffffffffffffffff" << endl;
+        cout << "Last: " << lastSize << " Current: " << currentSize << endl;
+        lastSize = dfa.size();
+        cout << "/////////////////////////////////////////////////////" << endl;
+
+        while (!L.empty())
+        {
+            seg();
+            // printL();
+            cout << "Run.." << endl;
+        }
+        merging(dfa);
+        currentSize = dfa.size();
     }
-    merging();
+
     printDFA();
+    cout << "Ran through " << counter << " time" << endl;
+    saveFile("optimized.txt");
 }
