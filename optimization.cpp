@@ -63,17 +63,6 @@ void load_file(string filePath)
             row.push_back(s);
         }
 
-        // vector<char> row;
-        // char entry;
-        // for (char c : line)
-        // {
-        //     if (c != ' ')
-        //     {
-        //         // Not a space add to matrix
-        //         entry = entry + c;
-        //     }
-        // }
-        // cout << entry << " " << endl;
         dfa.push_back(row);
     }
     // for (auto thing: entries)
@@ -96,6 +85,26 @@ void printDFA()
     }
 }
 
+void  printL()
+{
+    for (Grouping group: L)
+    {
+        cout << "?????????????????????" << endl;
+        cout << "States {";
+        for (auto state: group.states)
+        {
+            cout << state << " ";
+        }
+        cout << "} ";
+        cout << "Alphabet {";
+        for (auto letter: group.alphabet)
+        {
+            cout << letter << " ";
+        }
+        cout << "} " << endl;
+    }
+}
+
 void initialize()
 {
     Grouping acceptinStates;
@@ -114,7 +123,7 @@ void initialize()
         }
     }
     // Add sudo alphabet to both
-    for (int i = 0; i < dfa[0].size() - 2; i++)
+    for (int i = 2; i < dfa[0].size(); i++)
     {
         acceptinStates.alphabet.push_back(i);
         nonAcceptingStates.alphabet.push_back(i);
@@ -157,14 +166,16 @@ void seg()
     vector<int> states = potential.states;
     vector<int> alphabet = potential.alphabet;
     cout << "Top poped" << endl;
-    cout << "Alph len " << alphabet.size() << endl;
+    // cout << "Alph len " << alphabet.size() << endl;
+
+
     // Iterate over every row in dfa if its in states and see if its column (c)
     // has an entry
     // If so make a set
     // if not add to empty set
 
     // Get first letter in set alphabet and remove it from set
-    int letter = alphabet[0] + 2;
+    int letter = alphabet[0];
     alphabet.erase(alphabet.begin());
     vector<int> notTransitions;
     cout << "Initial letter..." << letter << endl;
@@ -174,33 +185,33 @@ void seg()
 
     for (int state : states)
     {
-        cout << "State.." << state << endl;
+        // cout << "State.." << state << endl;
         vector<string> row = dfa[state];
         if (row[letter] == "E")
         {
-            cout << "Error transition" << endl;
+            // cout << "Error transition" << endl;
             // Not a transition
             notTransitions.push_back(state);
         }
         else
         {
-            cout << "Valid Transition..." << pastMatches.size() << endl;
+            // cout << "Valid Transition..." << pastMatches.size() << endl;
             bool seen = false;
             for (matches &match : pastMatches)
             {
                 if (match.id == stoi(row[letter]))
                 {
-                    cout << "Seen before ... " << match.id << row[letter] << endl;
+                    // cout << "Seen before ... " << match.id << " " << row[letter] << endl;
                     match.stateIds.push_back(state);
                     seen = true;
-                    cout << "match len " << match.stateIds.size() << endl;
+                    // cout << "match len " << match.stateIds.size() << endl;
                     // pastMatches.push_back(match);
                     break;
                 }
             }
             if (!seen)
             {
-                cout << "Not seen before " << row[letter] << endl;
+                // cout << "Not seen before " << row[letter] << endl;
                 matches newMatch;
                 newMatch.id = stoi(row[letter]);
                 newMatch.stateIds.push_back(state);
@@ -235,7 +246,20 @@ void seg()
                 Grouping temp;
                 temp.states = partition.stateIds;
                 temp.alphabet = alphabet;
+                cout << "//////////////////////  SET {} ";
+                for (auto state: temp.states)
+                {
+                    cout << state << " ";
+                }
+                cout << endl;
+                cout << "ALPHA {} ";
+                for (auto letter: alphabet)
+                {
+                    cout << letter << " ";
+                } 
+                cout << "/////////////////////////" << endl;
                 L.push(temp);
+                printL();
             }
         }
     }
@@ -248,6 +272,7 @@ void seg()
             temp.alphabet = alphabet;
             temp.states = notTransitions;
             L.push(temp);
+            printL();
         }
     }
 
