@@ -20,7 +20,6 @@
  * 
  */
 
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -36,7 +35,7 @@ struct Grouping
     vector<int> alphabet; // Not the alphabet is a numercal column value
 };
 
-stack <Grouping> L;
+stack<Grouping> L;
 
 vector<vector<char>> dfa;
 
@@ -48,7 +47,7 @@ void load_file(string filePath)
     {
         // cout << line << endl;
         vector<char> row;
-        for (char c: line)
+        for (char c : line)
         {
             if (c != ' ')
             {
@@ -57,16 +56,15 @@ void load_file(string filePath)
             }
         }
         dfa.push_back(row);
-
     }
     inputFile.close();
 }
 
 void printDFA()
 {
-    for (auto row: dfa)
+    for (auto row : dfa)
     {
-        for (char c: row)
+        for (char c : row)
         {
             cout << c << " ";
         }
@@ -78,13 +76,13 @@ void initialize()
 {
     Grouping acceptinStates;
     Grouping nonAcceptingStates;
-    for (auto row: dfa)
+    for (auto row : dfa)
     {
         // Check if first char is + (accepting state)
         if (row[0] == '+')
         {
             // Add state id
-            acceptinStates.states.push_back(row[1]); 
+            acceptinStates.states.push_back(row[1]);
         }
         else
         {
@@ -92,7 +90,7 @@ void initialize()
         }
     }
     // Add sudo alphabet to both
-    for (int i = 0; i < dfa[0].size() -2; i++)
+    for (int i = 0; i < dfa[0].size() - 2; i++)
     {
         acceptinStates.alphabet.push_back(i);
         nonAcceptingStates.alphabet.push_back(i);
@@ -105,8 +103,8 @@ void seg()
 {
     Grouping potential = L.top();
     L.pop();
-    vector <int> states = potential.states;
-    vector <int> alphabet = potential.alphabet; 
+    vector<int> states = potential.states;
+    vector<int> alphabet = potential.alphabet;
     // Iterate over every row in dfa if its in states and see if its column (c)
     // has an entry
     // If so make a set
@@ -114,11 +112,17 @@ void seg()
 
     // Get first letter in set alphabet and remove it from set
     int letter = alphabet[0];
-    alphabet.erase(alphabet.begin()); 
-    vector<int> transitions;
+    alphabet.erase(alphabet.begin());
     vector<int> notTransitions;
+    struct matches
+    {
+        int id;
+        vector<int> stateIds;
+    };
+    vector<matches> pastMatches;
+    pastMatches.clear();
 
-    for (int state: states)
+    for (int state : states)
     {
         vector<char> row = dfa[state];
         if (row[letter] == 'E')
@@ -128,43 +132,60 @@ void seg()
         }
         else
         {
+            bool seen = false;
             //TODO:  Add to a set with the same row[letter]
-            transitions.push_back(state);
+            for (matches match : pastMatches)
+            {
+                if (match.id == row[letter])
+                {
+                    match.stateIds.push_back(state);
+                    seen = true;
+                    break;
+                }
+            }
+            if (!seen)
+            {
+                matches newMatch;
+                newMatch.id = row[letter];
+                newMatch.stateIds.push_back(state);
+            }
         }
     }
     // At this point should have all our partitions
     // For all partitions Xi (transitions, nonTransistions)
-    if (partition.size() > 1)
+    for (auto partition : pastMatches)
     {
-        if (alphabet.size() == 0)
+        if (partition.stateIds.size() > 1)
         {
-            // add S to M
+            if (alphabet.size() == 0)
+            {
+                // add S to M
+            }
+            else
+            {
+                Grouping temp;
+                temp.states = partition.stateIds;
+                temp.alphabet = alphabet;
+            }
         }
-        else
-        {
-            Grouping temp;
-            temp.states = partition;
-            temp.alphabet = alphabet;
-        }
-        
     }
-    
-
 }
-
 
 int main(int argc, char **argv)
 {
     if (argc < 2)
     {
         cout << "No input file given please provide \
-        absolute path to file" << endl;
+        absolute path to file"
+             << endl;
         exit(1);
     }
     load_file(argv[1]);
     printDFA();
+    initialize();
     while (!L.empty())
     {
         seg();
+        cout << "Run.." << endl;
     }
 }
