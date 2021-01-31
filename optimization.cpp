@@ -125,11 +125,14 @@ void initialize()
 
 void merging()
 {
+    cout << "SB " << dfa.size() << endl;
     cout << "M: " << M.size() << endl;
     // Merge things...
     for (vector<int> subset : M)
     {
         dfa.erase(dfa.begin() + (subset[1] - 1));
+        cout << "SA " << dfa.size() << subset[1] -1 << endl;
+
         for (auto row : dfa)
         {
             for (int i = 2; i < row.size(); i++)
@@ -218,17 +221,22 @@ void seg()
             if (alphabet.size() == 0)
             {
                 cout << "Alphabet size 0" << endl;
+                for (auto id: partition.stateIds)
+                {
+                    cout << id << " ";
+                }
+                cout << endl;
                 // add S to M
                 M.push_back(partition.stateIds);
             }
-            // else
-            // {
-            //     cout << "Adding a set back to L " << endl;
-            //     Grouping temp;
-            //     temp.states = partition.stateIds;
-            //     temp.alphabet = alphabet;
-            //     L.push(temp);
-            // }
+            else
+            {
+                cout << "Adding a set back to L " << endl;
+                Grouping temp;
+                temp.states = partition.stateIds;
+                temp.alphabet = alphabet;
+                L.push(temp);
+            }
         }
     }
     if (notTransitions.size() > 1)
@@ -266,4 +274,5 @@ int main(int argc, char **argv)
         cout << "Run.." << endl;
     }
     merging();
+    printDFA();
 }
