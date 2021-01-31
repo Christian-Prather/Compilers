@@ -26,6 +26,7 @@
 #include <set>
 #include <tuple>
 #include <stack>
+#include <sstream>
 
 using namespace std;
 
@@ -35,28 +36,51 @@ struct Grouping
     vector<int> alphabet; // Not the alphabet is a numercal column value
 };
 
+struct matches
+{
+    int id;
+    vector<int> stateIds;
+};
 stack<Grouping> L;
+vector<vector<int>> M;
 
-vector<vector<char>> dfa;
+vector<vector<string>> dfa;
 
 void load_file(string filePath)
 {
     string line;
     ifstream inputFile(filePath);
+    vector<string> entries;
     while (getline(inputFile, line))
     {
         // cout << line << endl;
-        vector<char> row;
-        for (char c : line)
+        vector<string> row;
+
+        istringstream ss(line);
+        for (string s; ss >> s;)
         {
-            if (c != ' ')
-            {
-                // Not a space add to matrix
-                row.push_back(c);
-            }
+            entries.push_back(s);
+            row.push_back(s);
         }
+
+        // vector<char> row;
+        // char entry;
+        // for (char c : line)
+        // {
+        //     if (c != ' ')
+        //     {
+        //         // Not a space add to matrix
+        //         entry = entry + c;
+        //     }
+        // }
+        // cout << entry << " " << endl;
         dfa.push_back(row);
     }
+    // for (auto thing: entries)
+    // {
+    //     cout << thing << " ";
+    // }
+
     inputFile.close();
 }
 
@@ -64,7 +88,7 @@ void printDFA()
 {
     for (auto row : dfa)
     {
-        for (char c : row)
+        for (string c : row)
         {
             cout << c << " ";
         }
@@ -79,14 +103,14 @@ void initialize()
     for (auto row : dfa)
     {
         // Check if first char is + (accepting state)
-        if (row[0] == '+')
+        if (row[0] == "+")
         {
             // Add state id
-            acceptinStates.states.push_back(row[1] - 48);
+            acceptinStates.states.push_back(stoi(row[1]));
         }
         else
         {
-            nonAcceptingStates.states.push_back(row[1] - 48);
+            nonAcceptingStates.states.push_back(stoi(row[1]));
         }
     }
     // Add sudo alphabet to both
@@ -99,6 +123,30 @@ void initialize()
     L.push(nonAcceptingStates);
 }
 
+void merging()
+{
+    cout << "M: " << M.size() << endl;
+    // Merge things...
+    for (vector<int> subset : M)
+    {
+        dfa.erase(dfa.begin() + (subset[1] - 1));
+        for (auto row : dfa)
+        {
+            for (int i = 2; i < row.size(); i++)
+            {
+                // cout << "Element " << row[i] << endl;
+                if (row[i] != "E")
+                {
+                    if (stoi(row[i]) == subset[1])
+                    {
+                        subset[1] = subset[0];
+                    }
+                }
+            }
+        }
+    }
+}
+
 void seg()
 {
     Grouping potential = L.top();
@@ -106,52 +154,52 @@ void seg()
     vector<int> states = potential.states;
     vector<int> alphabet = potential.alphabet;
     cout << "Top poped" << endl;
+    cout << "Alph len " << alphabet.size() << endl;
     // Iterate over every row in dfa if its in states and see if its column (c)
     // has an entry
     // If so make a set
     // if not add to empty set
 
     // Get first letter in set alphabet and remove it from set
-    int letter = alphabet[0];
+    int letter = alphabet[0] + 2;
     alphabet.erase(alphabet.begin());
     vector<int> notTransitions;
-    cout << "Initial letter..." << endl;
-    struct matches
-    {
-        int id;
-        vector<int> stateIds;
-    };
-    cout << "matches" << endl;
+    cout << "Initial letter..." << letter << endl;
+
     vector<matches> pastMatches;
     pastMatches.clear();
 
     for (int state : states)
     {
         cout << "State.." << state << endl;
-        vector<char> row = dfa[state];
-        if (row[letter] == 'E')
+        vector<string> row = dfa[state];
+        if (row[letter] == "E")
         {
+            cout << "Error transition" << endl;
             // Not a transition
             notTransitions.push_back(state);
         }
         else
         {
-            cout << "Not seen before..." << pastMatches.size() << endl;
+            cout << "Valid Transition..." << pastMatches.size() << endl;
             bool seen = false;
-            //TODO:  Add to a set with the same row[letter]
-            for (matches match : pastMatches)
+            for (matches &match : pastMatches)
             {
-                if (match.id == row[letter])
+                if (match.id == stoi(row[letter]))
                 {
+                    cout << "Seen before ... " << match.id << row[letter] << endl;
                     match.stateIds.push_back(state);
                     seen = true;
+                    cout << "match len " << match.stateIds.size() << endl;
+                    // pastMatches.push_back(match);
                     break;
                 }
             }
             if (!seen)
             {
+                cout << "Not seen before " << row[letter] << endl;
                 matches newMatch;
-                newMatch.id = row[letter];
+                newMatch.id = stoi(row[letter]);
                 newMatch.stateIds.push_back(state);
                 pastMatches.push_back(newMatch);
             }
@@ -159,22 +207,45 @@ void seg()
     }
     // At this point should have all our partitions
     // For all partitions Xi (transitions, nonTransistions)
-    for (auto partition : pastMatches)
+    for (matches partition : pastMatches)
     {
+        cout << "PARTITION:" << endl;
+        cout << partition.id << endl;
+        cout << partition.stateIds.size() << endl;
         if (partition.stateIds.size() > 1)
         {
+            cout << "Greater " << endl;
             if (alphabet.size() == 0)
             {
+                cout << "Alphabet size 0" << endl;
                 // add S to M
+                M.push_back(partition.stateIds);
             }
-            else
-            {
-                Grouping temp;
-                temp.states = partition.stateIds;
-                temp.alphabet = alphabet;
-            }
+            // else
+            // {
+            //     cout << "Adding a set back to L " << endl;
+            //     Grouping temp;
+            //     temp.states = partition.stateIds;
+            //     temp.alphabet = alphabet;
+            //     L.push(temp);
+            // }
         }
     }
+    if (notTransitions.size() > 1)
+    {
+        if (alphabet.size() != 0)
+        {
+            cout << "Pushing non transition set back to L" << notTransitions.size() << endl;
+            Grouping temp;
+            temp.alphabet = alphabet;
+            temp.states = notTransitions;
+            L.push(temp);
+        }
+    }
+
+    // merging();
+    // cout << "Otimized...." << endl;
+    // printDFA();
 }
 
 int main(int argc, char **argv)
@@ -194,4 +265,5 @@ int main(int argc, char **argv)
         seg();
         cout << "Run.." << endl;
     }
+    merging();
 }
