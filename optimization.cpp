@@ -32,8 +32,8 @@ using namespace std;
 
 struct Grouping
 {
-    set<int> states;
-    set<int> alphabet; // Not the alphabet is a numercal column value
+    vector<int> states;
+    vector<int> alphabet; // Not the alphabet is a numercal column value
 };
 
 stack <Grouping> L;
@@ -84,21 +84,72 @@ void initialize()
         if (row[0] == '+')
         {
             // Add state id
-            acceptinStates.states.insert(row[1]); 
+            acceptinStates.states.push_back(row[1]); 
         }
         else
         {
-            nonAcceptingStates.states.insert(row[1]);
+            nonAcceptingStates.states.push_back(row[1]);
         }
     }
     // Add sudo alphabet to both
     for (int i = 0; i < dfa[0].size() -2; i++)
     {
-        acceptinStates.alphabet.insert(i);
-        nonAcceptingStates.alphabet.insert(i);
+        acceptinStates.alphabet.push_back(i);
+        nonAcceptingStates.alphabet.push_back(i);
     }
     L.push(acceptinStates);
     L.push(nonAcceptingStates);
+}
+
+void seg()
+{
+    Grouping potential = L.top();
+    L.pop();
+    vector <int> states = potential.states;
+    vector <int> alphabet = potential.alphabet; 
+    // Iterate over every row in dfa if its in states and see if its column (c)
+    // has an entry
+    // If so make a set
+    // if not add to empty set
+
+    // Get first letter in set alphabet and remove it from set
+    int letter = alphabet[0];
+    alphabet.erase(alphabet.begin()); 
+    vector<int> transitions;
+    vector<int> notTransitions;
+
+    for (int state: states)
+    {
+        vector<char> row = dfa[state];
+        if (row[letter] == 'E')
+        {
+            // Not a transition
+            notTransitions.push_back(state);
+        }
+        else
+        {
+            //TODO:  Add to a set with the same row[letter]
+            transitions.push_back(state);
+        }
+    }
+    // At this point should have all our partitions
+    // For all partitions Xi (transitions, nonTransistions)
+    if (partition.size() > 1)
+    {
+        if (alphabet.size() == 0)
+        {
+            // add S to M
+        }
+        else
+        {
+            Grouping temp;
+            temp.states = partition;
+            temp.alphabet = alphabet;
+        }
+        
+    }
+    
+
 }
 
 
@@ -111,5 +162,9 @@ int main(int argc, char **argv)
         exit(1);
     }
     load_file(argv[1]);
-    printDFA(); 
+    printDFA();
+    while (!L.empty())
+    {
+        seg();
+    }
 }
