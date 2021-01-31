@@ -41,7 +41,7 @@ struct matches
     int id;
     vector<int> stateIds;
 };
-stack<Grouping> L;
+vector<Grouping> L;
 vector<vector<int>> M;
 
 vector<vector<string>> dfa;
@@ -89,7 +89,7 @@ void  printL()
 {
     for (Grouping group: L)
     {
-        cout << "?????????????????????" << endl;
+        cout << "----------------------------------" << endl;
         cout << "States {";
         for (auto state: group.states)
         {
@@ -103,6 +103,23 @@ void  printL()
         }
         cout << "} " << endl;
     }
+    cout << "--------------------------------"  << endl;
+
+}
+
+void printM()
+{
+        for (auto set: M)
+    {
+        cout << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM" << endl;
+        cout << "States {";
+        for (auto state: set)
+        {
+            cout << state << " ";
+        }
+        cout << "} " << endl;
+      }
+    cout << "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"  << endl;
 }
 
 void initialize()
@@ -128,8 +145,8 @@ void initialize()
         acceptinStates.alphabet.push_back(i);
         nonAcceptingStates.alphabet.push_back(i);
     }
-    L.push(acceptinStates);
-    L.push(nonAcceptingStates);
+    L.insert(L.begin(), acceptinStates);
+    L.insert(L.begin(), nonAcceptingStates);
 }
 
 void merging()
@@ -161,8 +178,8 @@ void merging()
 
 void seg()
 {
-    Grouping potential = L.top();
-    L.pop();
+    Grouping potential = L.front();
+    L.erase(L.begin());
     vector<int> states = potential.states;
     vector<int> alphabet = potential.alphabet;
     cout << "Top poped" << endl;
@@ -228,7 +245,7 @@ void seg()
         cout << partition.stateIds.size() << endl;
         if (partition.stateIds.size() > 1)
         {
-            cout << "Greater " << endl;
+            // cout << "Greater " << endl;
             if (alphabet.size() == 0)
             {
                 cout << "Alphabet size 0" << endl;
@@ -238,7 +255,9 @@ void seg()
                 }
                 cout << endl;
                 // add S to M
+                cout << "Addind to M" << endl;
                 M.push_back(partition.stateIds);
+                printM();
             }
             else
             {
@@ -258,7 +277,7 @@ void seg()
                     cout << letter << " ";
                 } 
                 cout << "/////////////////////////" << endl;
-                L.push(temp);
+                L.insert(L.begin(), temp);
                 printL();
             }
         }
@@ -271,8 +290,17 @@ void seg()
             Grouping temp;
             temp.alphabet = alphabet;
             temp.states = notTransitions;
-            L.push(temp);
+            L.insert(L.begin(), temp);
             printL();
+        }
+        else
+        {
+                cout << "Alphabet ii size 0" << endl;
+                        // add S to M
+                cout << "Addind to M" << endl;
+                M.push_back(notTransitions);
+                printM();
+
         }
     }
 
