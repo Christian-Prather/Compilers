@@ -82,11 +82,11 @@ void initialize()
         if (row[0] == '+')
         {
             // Add state id
-            acceptinStates.states.push_back(row[1]);
+            acceptinStates.states.push_back(row[1] - 48);
         }
         else
         {
-            nonAcceptingStates.states.push_back(row[1]);
+            nonAcceptingStates.states.push_back(row[1] - 48);
         }
     }
     // Add sudo alphabet to both
@@ -105,6 +105,7 @@ void seg()
     L.pop();
     vector<int> states = potential.states;
     vector<int> alphabet = potential.alphabet;
+    cout << "Top poped" << endl;
     // Iterate over every row in dfa if its in states and see if its column (c)
     // has an entry
     // If so make a set
@@ -114,16 +115,19 @@ void seg()
     int letter = alphabet[0];
     alphabet.erase(alphabet.begin());
     vector<int> notTransitions;
+    cout << "Initial letter..." << endl;
     struct matches
     {
         int id;
         vector<int> stateIds;
     };
+    cout << "matches" << endl;
     vector<matches> pastMatches;
     pastMatches.clear();
 
     for (int state : states)
     {
+        cout << "State.." << state << endl;
         vector<char> row = dfa[state];
         if (row[letter] == 'E')
         {
@@ -132,6 +136,7 @@ void seg()
         }
         else
         {
+            cout << "Not seen before..." << pastMatches.size() << endl;
             bool seen = false;
             //TODO:  Add to a set with the same row[letter]
             for (matches match : pastMatches)
@@ -148,6 +153,7 @@ void seg()
                 matches newMatch;
                 newMatch.id = row[letter];
                 newMatch.stateIds.push_back(state);
+                pastMatches.push_back(newMatch);
             }
         }
     }
