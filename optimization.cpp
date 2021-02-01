@@ -162,7 +162,7 @@ void initialize()
 
 void merging(vector<vector<string>> &dfa)
 {
-    cout << "Initial Size " << dfa.size() << endl;
+    // cout << "Initial Size " << dfa.size() << endl;
     // cout << "M: " << M.size() << endl;
     // Merge things...
     for (vector<int> subset : M)
@@ -172,8 +172,8 @@ void merging(vector<vector<string>> &dfa)
             auto row = dfa[i];
             if (stoi(row[1]) == subset[1])
             {
-                cout << "Deletig " << subset[1] << endl;
-                cout << "New Size " << dfa.size() << endl;
+                // cout << "Deletig " << subset[1] << endl;
+                // cout << "New Size " << dfa.size() << endl;
 
                 dfa.erase(dfa.begin() + i);
             }
@@ -192,10 +192,10 @@ void merging(vector<vector<string>> &dfa)
                 {
                     if (stoi(row[j]) == subset[1])
                     {
-                        cout << "Replaced " << row[j];
+                        // cout << "Replaced " << row[j];
 
                         row[j] = to_string(subset[0]);
-                        cout << " with " << row[j] << endl;
+                        // cout << " with " << row[j] << endl;
                     }
                 }
             }
@@ -210,8 +210,6 @@ void seg()
     L.erase(L.begin());
     vector<int> states = potential.states;
     vector<int> alphabet = potential.alphabet;
-    // cout << "Top poped" << endl;
-    // cout << "Alph len " << alphabet.size() << endl;
 
     // Iterate over every row in dfa if its in states and see if its column (c)
     // has an entry
@@ -222,7 +220,7 @@ void seg()
     int letter = alphabet[0];
     alphabet.erase(alphabet.begin());
     vector<int> notTransitions;
-    cout << "Initial letter..." << letter << endl;
+    // cout << "Initial letter..." << letter << endl;
 
     vector<matches> pastMatches;
     pastMatches.clear();
@@ -249,13 +247,13 @@ void seg()
         }
         else
         {
-            cout << "Valid Transition..." << row[letter] << endl;
+            // cout << "Valid Transition..." << row[letter] << endl;
             bool seen = false;
             for (matches &match : pastMatches)
             {
                 if (match.id == stoi(row[letter]))
                 {
-                    cout << "Seen before ... " << match.id << " " << row[letter] << endl;
+                    // cout << "Seen before ... " << match.id << " " << row[letter] << endl;
                     match.stateIds.push_back(state);
                     seen = true;
                     // cout << "match len " << match.stateIds.size() << endl;
@@ -265,7 +263,7 @@ void seg()
             }
             if (!seen)
             {
-                cout << "Not seen before " << row[letter] << endl;
+                // cout << "Not seen before " << row[letter] << endl;
                 matches newMatch;
                 newMatch.id = stoi(row[letter]);
                 newMatch.stateIds.push_back(state);
@@ -277,45 +275,24 @@ void seg()
     // For all partitions Xi (transitions, nonTransistions)
     for (matches partition : pastMatches)
     {
-        // cout << "PARTITION:" << endl;
-        // cout << partition.id << endl;
-        // cout << partition.stateIds.size() << endl;
         if (partition.stateIds.size() > 1)
         {
             // cout << "Greater " << endl;
             if (alphabet.size() == 0)
             {
-                // cout << "Alphabet size 0" << endl;
-                // for (auto id : partition.stateIds)
-                // {
-                //     cout << id << " ";
-                // }
-                // cout << endl;
                 // add S to M
-                cout << "Addind to M" << endl;
+                // cout << "Addind to M" << endl;
                 M.push_back(partition.stateIds);
-                printM();
+                // printM();
             }
             else
             {
-                cout << "Adding a set back to L " << endl;
+                // cout << "Adding a set back to L " << endl;
                 Grouping temp;
                 temp.states = partition.stateIds;
                 temp.alphabet = alphabet;
-                // cout << "//////////////////////  SET {} ";
-                // for (auto state : temp.states)
-                // {
-                //     // cout << state << " ";
-                // }
-                // cout << endl;
-                // cout << "ALPHA {} ";
-                // for (auto letter : alphabet)
-                // {
-                //     cout << letter << " ";
-                // }
-                // cout << "/////////////////////////" << endl;
                 L.insert(L.begin(), temp);
-                printL();
+                // printL();
             }
         }
     }
@@ -323,26 +300,21 @@ void seg()
     {
         if (alphabet.size() != 0)
         {
-            cout << "Pushing non transition set back to L" << notTransitions.size() << endl;
+            // cout << "Pushing non transition set back to L" << notTransitions.size() << endl;
             Grouping temp;
             temp.alphabet = alphabet;
             temp.states = notTransitions;
             L.insert(L.begin(), temp);
-            printL();
+            // printL();
         }
         else
         {
-            // cout << "Alphabet ii size 0" << endl;
             // add S to M
-            cout << "Addind to M" << endl;
+            // cout << "Addind to M" << endl;
             M.push_back(notTransitions);
-            printM();
+            // printM();
         }
     }
-
-    // merging();
-    // cout << "Otimized...." << endl;
-    // printDFA();
 }
 
 int main(int argc, char **argv)
@@ -359,25 +331,20 @@ int main(int argc, char **argv)
 
     int lastSize = dfa.size();
     int currentSize = 0;
-    // printDFA();
     int counter = 0;
     while (lastSize != currentSize)
-    // for (int i = 0; i < 2; i++)
     {
         counter++;
-        printDFA();
+        // printDFA();
         initialize();
-        printL();
-        cout << "fffffffffffffffffffffffffff" << endl;
-        cout << "Last: " << lastSize << " Current: " << currentSize << endl;
+        // printL();
         lastSize = dfa.size();
-        cout << "/////////////////////////////////////////////////////" << endl;
 
         while (!L.empty())
         {
             seg();
             // printL();
-            cout << "Run.." << endl;
+            // cout << "Optimizing.." << endl;
         }
         merging(dfa);
         currentSize = dfa.size();
