@@ -27,8 +27,20 @@
 #include <tuple>
 #include <stack>
 #include <sstream>
+#include <map>
 
 using namespace std;
+
+struct TransistionRow
+{
+    bool isStart;
+    bool isAccept;
+    vector<string> states;
+    map<string, vector<string>> transitions;
+
+};
+
+vector<TransistionRow> transitionTable;
 
 struct Grouping
 {
@@ -45,14 +57,32 @@ vector<Grouping> L;
 vector<vector<int>> M;
 
 vector<vector<string>> dfa;
+vector<vector<string>> nfa;
+
+vector<string> firstRow;
+vector<string> acceptingStates;
 
 void load_file(string filePath)
 {
     string line;
     ifstream inputFile(filePath);
     vector<string> entries;
+    // bool firstLine = true;
+
     while (getline(inputFile, line))
     {
+        // // Ge the first line
+        // if (firstLine)
+        // {
+
+        //     istringstream ss(line);
+        //     for (string s; ss >> s;)
+        //     {
+        //         firstRow.push_back(s);
+        //         firstLine = false;
+        //         continue;
+        //     }
+        // }
         // cout << line << endl;
         vector<string> row;
 
@@ -63,9 +93,141 @@ void load_file(string filePath)
             row.push_back(s);
         }
 
-        dfa.push_back(row);
+        // // Got next line now make the formatted row
+        // vector<string> formattedRow;
+        // formattedRow.push_back(row[0]);
+        // formattedRow.push_back(row[1]);
+        // for (int i = 1; i < firstRow.size(); i++)
+        // {
+        //     if (row[3] == firstRow[i])
+        //     {
+        //         // Mathcing symbol
+        //         formattedRow.push_back(row[2]);
+        //     }
+        //     else
+        //     {
+        //         // Put an E
+        //         formattedRow.push_back("E");
+        //     }
+
+        // }
+
+        rawDfa.push_back(row);
+        // dfa.push_back(formattedRow);
     }
     inputFile.close();
+}
+
+vector<int> findRow(string id)
+{
+    vector<int> indexes;
+    for (int i = 0; i < dfa.size(); i++)
+    {
+        auto row = dfa[i];
+        if (row[1] == id)
+        {
+            indexes.push_back(i);
+        }
+    }
+    return indexes;
+}
+
+void followLabda(vector<string> &S)
+{
+    vector<string> lambdaM;
+
+    for (auto id : S)
+    {
+        lambdaM.push_back(id);
+    }
+
+    for (auto id : lambdaM)
+    {
+        int index = findRow(id);
+        auto transition = dfa[index];
+        if (transition[3] == firstRow[1])
+        {
+            // Lambda add the to state id to M and eye
+            // lambdaM may be an issue adding to it like this
+            // may need to convert it to a true stack
+            S.push_back(transition[2]);
+            lambdaM.push_back(transition[2]);
+        }
+    }
+}
+
+vector<string> followChar(vector<string> S, string c)
+{
+    vector<string> F;
+    for (auto state: S)
+    {
+        vector<int> indexes = findRow(state);
+        for (auto index: indexes)
+        {
+            auto row = nfa[index];
+            if (row[3] == firstRow[1])
+            {
+                F.push_back(row[2]);
+            }
+        }
+
+    }
+    return F;
+}
+void findAcceptingStates()
+{
+    for (auto row: nfa)
+    {
+        if (row[0] == "+")
+        {
+            // Accepting state
+            acceptingStates.push_back(row[1]);
+        }
+    }
+}
+
+bool isAccept(vector<string> B)
+{
+    for (auto id: B)
+    {
+        for (auto acceptingOption: acceptingStates)
+        {
+            if (id == acceptingOption)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+
+
+void convertNFAtoDFA()
+{
+    firstRow = nfa[0];
+
+    for (int i = 1; i < nfa.size(); i++)
+    {
+        auto row = nfa[i];
+        vector<string> formattedRow;
+        formattedRow.push_back(row[0]);
+        formattedRow.push_back(row[1]);
+        for (int i = 1; i < firstRow.size(); i++)
+        {
+            if (row[3] == firstRow[i])
+            {
+                // Mathcing symbol
+                formattedRow.push_back(row[2]);
+            }
+            else
+            {
+                // Put an E
+                formattedRow.push_back("E");
+            }
+        }
+        dfa.push_back(formattedRow);
+    }
 }
 
 void saveFile(string filePath)
@@ -328,29 +490,31 @@ int main(int argc, char **argv)
     }
     string inputFile = argv[1];
     load_file(inputFile);
+    // convertFormat();
+    // // printDFA();
 
-    int lastSize = dfa.size();
-    int currentSize = 0;
-    int counter = 0;
-    while (lastSize != currentSize)
-    {
-        counter++;
-        // printDFA();
-        initialize();
-        // printL();
-        lastSize = dfa.size();
+    // int lastSize = dfa.size();
+    // int currentSize = 0;
+    // int counter = 0;
+    // while (lastSize != currentSize)
+    // {
+    //     counter++;
+    //     // printDFA();
+    //     initialize();
+    //     // printL();
+    //     lastSize = dfa.size();
 
-        while (!L.empty())
-        {
-            seg();
-            // printL();
-            // cout << "Optimizing.." << endl;
-        }
-        merging(dfa);
-        currentSize = dfa.size();
-    }
+    //     while (!L.empty())
+    //     {
+    //         seg();
+    //         // printL();
+    //         // cout << "Optimizing.." << endl;
+    //     }
+    //     merging(dfa);
+    //     currentSize = dfa.size();
+    // }
 
-    printDFA();
-    cout << "Ran through " << counter << " time" << endl;
-    saveFile("optimized.txt");
+    // printDFA();
+    // cout << "Ran through " << counter << " time" << endl;
+    // saveFile("optimized.txt");
 }
