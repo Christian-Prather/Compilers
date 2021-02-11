@@ -12,7 +12,7 @@ if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
     string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
            CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
   else()
-    set(CMAKE_INSTALL_CONFIG_NAME "")
+    set(CMAKE_INSTALL_CONFIG_NAME "Debug")
   endif()
   message(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
 endif()
@@ -56,7 +56,7 @@ file(INSTALL DESTINATION "/usr/local/bin" TYPE EXECUTABLE FILES "/home/christian
   if(EXISTS "$ENV{DESTDIR}/usr/local/bin/dfa" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}/usr/local/bin/dfa")
     if(CMAKE_INSTALL_DO_STRIP)
-      execute_process(COMMAND "/usr/bin/strip" "$ENV{DESTDIR}/usr/local/bin/dfa")
+      execute_process(COMMAND "/bin/strip" "$ENV{DESTDIR}/usr/local/bin/dfa")
     endif()
   endif()
 endif()

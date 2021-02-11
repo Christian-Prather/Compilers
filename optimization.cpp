@@ -33,6 +33,7 @@ using namespace std;
 
 struct TransistionRow
 {
+    int id;
     bool isStart;
     bool isAccept;
     vector<string> states;
@@ -122,9 +123,9 @@ void load_file(string filePath)
 vector<int> findRow(string id)
 {
     vector<int> indexes;
-    for (int i = 0; i < dfa.size(); i++)
+    for (int i = 0; i < nfa.size(); i++)
     {
-        auto row = dfa[i];
+        auto row = nfa[i];
         if (row[1] == id)
         {
             indexes.push_back(i);
@@ -147,7 +148,7 @@ void followLabda(vector<string> &S)
         vector<int> indexes = findRow(id);
         for (auto index : indexes)
         {
-            auto transition = dfa[index];
+            auto transition = nfa[index];
             if (transition[3] == firstRow[1])
             {
                 // Lambda add the to state id to M and eye
@@ -169,11 +170,15 @@ vector<string> followChar(vector<string> S, string c)
         for (auto index : indexes)
         {
             auto row = nfa[index];
-            if (row[3] == firstRow[1])
+            if (row[3] == c)
             {
                 F.push_back(row[2]);
             }
         }
+    }
+    if (F.size() == 0)
+    {
+        F = emptySet;
     }
     return F;
 }
@@ -241,85 +246,63 @@ bool checkForEntry(vector<string> R)
     }
     return false;
 }
-TransistionRow getRow(vector<string> S)
+TransistionRow *getRow(vector<string> S)
 {
-    for (auto row : transitionTable)
+    for (int i = 0; i < transitionTable.size(); i++)
     {
-        if (checkEntryRow(row.states, S))
-            ;
+        if (checkEntryRow(transitionTable[i].states, S))
         {
-            return row;
+            return &transitionTable[i];
         }
     }
 }
 void buildDFA()
 {
+    int counter = 0;
+
+    for (int i =0; i < transitionTable.size(); i++)
+    {
+        transitionTable[i].id = counter;
+        counter++;
+    }
+
     for (auto transition : transitionTable)
     {
-        int counter = 1;
-        for (auto state : transition.states)
+        // Map every row to an id
+
+        vector<string> row;
+        if (transition.isAccept)
         {
-            // vector<string> row;
-            string first;
-            string second;
-
-            if (transition.isAccept)
-            {
-                first = "+";
-            }
-            else
-            {
-                first = "-";
-            }
-            if (transition.isStart)
-            {
-                second = "0";
-            }
-            else
-            {
-                second = to_string(counter);
-                counter++;
-            }
-
-            for (auto letter : alphabet)
-            {
-                if (transition.transitions[letter][0] == "E")
-                {
-                    vector<string> row;
-                    row.push_back(first);
-                    row.push_back(second);
-                    row.push_back("E");
-                    dfa.push_back(row);
-                }
-                else
-                {
-                    for (auto id : transition.transitions[letter])
-                    {
-                        vector<string> row;
-                        row.push_back(first);
-                        row.push_back(second);
-                        row.push_back(id);
-                        dfa.push_back(row);
-                    }
-                }
-            }
-
-            // map<string, vector<string>>::iterator itr;
-            // for (itr = transition.transitions.begin(); itr != transition.transitions.end(); ++itr)
-            // {
-
-            // }
+            row.push_back("+");
         }
+        else
+        {
+            row.push_back("-");
+        }
+
+        row.push_back(to_string(transition.id));
+        for (auto letter : alphabet)
+        {
+            if (transition.transitions[letter][0] == "E")
+            {
+                row.push_back("E");
+            }
+            else
+            {
+                TransistionRow *matchingRow = getRow(transition.transitions[letter]);
+                row.push_back(to_string(matchingRow->id));
+            }
+        }
+        dfa.push_back(row);
     }
 }
 void convertNFAtoDFA()
 {
     bool start = true;
     firstRow = nfa[0];
+    parseAlphabet();
     stack<vector<string>> localL;
-
-    vector<string> i = {0};
-    followLabda(i);
+    vector<string> i = {"0"};
 
     TransistionRow startRow = TransistionRow();
     startRow.isStart = start;
@@ -327,23 +310,25 @@ void convertNFAtoDFA()
     startRow.states = i;
     localL.push(i);
     start = false;
+    transitionTable.push_back(startRow);
+    followLabda(i);
 
     while (!localL.empty())
     {
         vector<string> S = localL.top();
         localL.pop();
 
-        TransistionRow currentRow = getRow(S);
-
         // TransistionRow currentRow;
         for (auto letter : alphabet)
         {
+            TransistionRow *currentRow = getRow(S);
+
             vector<string> R = followChar(S, letter);
             followLabda(R);
-            if (R.size() > 0)
+            if (R[0] != "E")
             {
                 // Fill in transisitonRow mapping letter -> R
-                currentRow.transitions.insert(pair<string, vector<string>>(letter, R));
+                currentRow->transitions.insert(pair<string, vector<string>>(letter, R));
                 // Check if there is an entry in the transition table
                 bool seen = checkForEntry(R);
                 if (!seen)
@@ -360,7 +345,7 @@ void convertNFAtoDFA()
             else
             {
                 // Fill in transitonRow mapping of letter -> E
-                currentRow.transitions.insert(pair<string, vector<string>>(letter, emptySet));
+                currentRow->transitions.insert(pair<string, vector<string>>(letter, emptySet));
             }
         }
     }
@@ -619,14 +604,15 @@ void seg()
 
 int main(int argc, char **argv)
 {
-    if (argc < 2)
-    {
-        cout << "No input file given please provide \
-        absolute path to file"
-             << endl;
-        exit(1);
-    }
-    string inputFile = argv[1];
+    // if (argc < 2)
+    // {
+    //     cout << "No input file given please provide \
+    //     absolute path to file"
+    //          << endl;
+    //     exit(1);
+    // }
+    // string inputFile = argv[1];
+    string inputFile = "/home/christian/Documents/Compilers/test-files/NF/cblock.nfa";
     load_file(inputFile);
     convertNFAtoDFA();
     // convertFormat();

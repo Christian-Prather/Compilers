@@ -1,1 +1,1 @@
-/usr/bin/c++   -pthread  -rdynamic CMakeFiles/dfa.dir/optimization.cpp.o  -o dfa 
+/bin/g++-9   -pthread -g  -rdynamic CMakeFiles/dfa.dir/optimization.cpp.o  -o dfa 
