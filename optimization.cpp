@@ -37,7 +37,6 @@ struct TransistionRow
     bool isAccept;
     vector<string> states;
     map<string, vector<string>> transitions;
-
 };
 
 vector<TransistionRow> transitionTable;
@@ -61,6 +60,8 @@ vector<vector<string>> nfa;
 
 vector<string> firstRow;
 vector<string> acceptingStates;
+vector<string> alphabet;
+vector<string> emptySet = {"E"};
 
 void load_file(string filePath)
 {
@@ -112,7 +113,7 @@ void load_file(string filePath)
 
         // }
 
-        rawDfa.push_back(row);
+        nfa.push_back(row);
         // dfa.push_back(formattedRow);
     }
     inputFile.close();
@@ -143,15 +144,18 @@ void followLabda(vector<string> &S)
 
     for (auto id : lambdaM)
     {
-        int index = findRow(id);
-        auto transition = dfa[index];
-        if (transition[3] == firstRow[1])
+        vector<int> indexes = findRow(id);
+        for (auto index : indexes)
         {
-            // Lambda add the to state id to M and eye
-            // lambdaM may be an issue adding to it like this
-            // may need to convert it to a true stack
-            S.push_back(transition[2]);
-            lambdaM.push_back(transition[2]);
+            auto transition = dfa[index];
+            if (transition[3] == firstRow[1])
+            {
+                // Lambda add the to state id to M and eye
+                // lambdaM may be an issue adding to it like this
+                // may need to convert it to a true stack
+                S.push_back(transition[2]);
+                lambdaM.push_back(transition[2]);
+            }
         }
     }
 }
@@ -159,10 +163,10 @@ void followLabda(vector<string> &S)
 vector<string> followChar(vector<string> S, string c)
 {
     vector<string> F;
-    for (auto state: S)
+    for (auto state : S)
     {
         vector<int> indexes = findRow(state);
-        for (auto index: indexes)
+        for (auto index : indexes)
         {
             auto row = nfa[index];
             if (row[3] == firstRow[1])
@@ -170,13 +174,12 @@ vector<string> followChar(vector<string> S, string c)
                 F.push_back(row[2]);
             }
         }
-
     }
     return F;
 }
 void findAcceptingStates()
 {
-    for (auto row: nfa)
+    for (auto row : nfa)
     {
         if (row[0] == "+")
         {
@@ -188,9 +191,9 @@ void findAcceptingStates()
 
 bool isAccept(vector<string> B)
 {
-    for (auto id: B)
+    for (auto id : B)
     {
-        for (auto acceptingOption: acceptingStates)
+        for (auto acceptingOption : acceptingStates)
         {
             if (id == acceptingOption)
             {
@@ -200,34 +203,169 @@ bool isAccept(vector<string> B)
     }
     return false;
 }
-
-
-
-void convertNFAtoDFA()
+void parseAlphabet()
 {
-    firstRow = nfa[0];
-
-    for (int i = 1; i < nfa.size(); i++)
+    for (int i = 1; i < firstRow.size(); i++)
     {
-        auto row = nfa[i];
-        vector<string> formattedRow;
-        formattedRow.push_back(row[0]);
-        formattedRow.push_back(row[1]);
-        for (int i = 1; i < firstRow.size(); i++)
+        alphabet.push_back(firstRow[i]);
+    }
+}
+bool checkEntryRow(vector<string> entry, vector<string> R)
+{
+    for (auto state : entry)
+    {
+        bool match = false;
+        for (auto id : R)
         {
-            if (row[3] == firstRow[i])
+            if (id == state)
             {
-                // Mathcing symbol
-                formattedRow.push_back(row[2]);
+                match = true;
+            }
+        }
+        if (!match)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+bool checkForEntry(vector<string> R)
+{
+    for (auto transition : transitionTable)
+    {
+        bool matching = checkEntryRow(transition.states, R);
+        if (matching)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+TransistionRow getRow(vector<string> S)
+{
+    for (auto row : transitionTable)
+    {
+        if (checkEntryRow(row.states, S))
+            ;
+        {
+            return row;
+        }
+    }
+}
+void buildDFA()
+{
+    for (auto transition : transitionTable)
+    {
+        int counter = 1;
+        for (auto state : transition.states)
+        {
+            // vector<string> row;
+            string first;
+            string second;
+
+            if (transition.isAccept)
+            {
+                first = "+";
             }
             else
             {
-                // Put an E
-                formattedRow.push_back("E");
+                first = "-";
+            }
+            if (transition.isStart)
+            {
+                second = "0";
+            }
+            else
+            {
+                second = to_string(counter);
+                counter++;
+            }
+
+            for (auto letter : alphabet)
+            {
+                if (transition.transitions[letter][0] == "E")
+                {
+                    vector<string> row;
+                    row.push_back(first);
+                    row.push_back(second);
+                    row.push_back("E");
+                    dfa.push_back(row);
+                }
+                else
+                {
+                    for (auto id : transition.transitions[letter])
+                    {
+                        vector<string> row;
+                        row.push_back(first);
+                        row.push_back(second);
+                        row.push_back(id);
+                        dfa.push_back(row);
+                    }
+                }
+            }
+
+            // map<string, vector<string>>::iterator itr;
+            // for (itr = transition.transitions.begin(); itr != transition.transitions.end(); ++itr)
+            // {
+
+            // }
+        }
+    }
+}
+void convertNFAtoDFA()
+{
+    bool start = true;
+    firstRow = nfa[0];
+    stack<vector<string>> localL;
+
+    vector<string> i = {0};
+    followLabda(i);
+
+    TransistionRow startRow = TransistionRow();
+    startRow.isStart = start;
+    startRow.isAccept = isAccept(i);
+    startRow.states = i;
+    localL.push(i);
+    start = false;
+
+    while (!localL.empty())
+    {
+        vector<string> S = localL.top();
+        localL.pop();
+
+        TransistionRow currentRow = getRow(S);
+
+        // TransistionRow currentRow;
+        for (auto letter : alphabet)
+        {
+            vector<string> R = followChar(S, letter);
+            followLabda(R);
+            if (R.size() > 0)
+            {
+                // Fill in transisitonRow mapping letter -> R
+                currentRow.transitions.insert(pair<string, vector<string>>(letter, R));
+                // Check if there is an entry in the transition table
+                bool seen = checkForEntry(R);
+                if (!seen)
+                {
+                    // initialize row
+                    TransistionRow newTransition = TransistionRow();
+                    newTransition.isStart = start;
+                    newTransition.isAccept = isAccept(R);
+                    newTransition.states = R;
+                    localL.push(R);
+                    transitionTable.push_back(newTransition);
+                }
+            }
+            else
+            {
+                // Fill in transitonRow mapping of letter -> E
+                currentRow.transitions.insert(pair<string, vector<string>>(letter, emptySet));
             }
         }
-        dfa.push_back(formattedRow);
     }
+
+    buildDFA();
 }
 
 void saveFile(string filePath)
@@ -490,8 +628,9 @@ int main(int argc, char **argv)
     }
     string inputFile = argv[1];
     load_file(inputFile);
+    convertNFAtoDFA();
     // convertFormat();
-    // // printDFA();
+    printDFA();
 
     // int lastSize = dfa.size();
     // int currentSize = 0;
