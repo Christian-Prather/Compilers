@@ -67,6 +67,10 @@ vector<int> finals;
 void load_file(string filePath)
 {
     string line;
+    if (filePath == "/dev/null")
+    {
+        exit(1);
+    }
     ifstream inputFile(filePath);
     if (!inputFile)
     {
