@@ -63,7 +63,7 @@ vector<string> firstRow;
 vector<string> acceptingStates;
 vector<string> alphabet;
 vector<string> emptySet = {"E"};
-
+vector<int> finals;
 void load_file(string filePath)
 {
     string line;
@@ -134,28 +134,46 @@ vector<int> findRow(string id)
     return indexes;
 }
 
+bool checkInS(vector<string> &S, string potential)
+{
+    for (auto s : S)
+    {
+        if (s == potential)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void followLabda(vector<string> &S)
 {
-    vector<string> lambdaM;
+    stack<string> lambdaM;
 
     for (auto id : S)
     {
-        lambdaM.push_back(id);
+        lambdaM.push(id);
     }
 
-    for (auto id : lambdaM)
+    while (lambdaM.size() > 0)
     {
+        string id = lambdaM.top();
+        lambdaM.pop();
         vector<int> indexes = findRow(id);
         for (auto index : indexes)
         {
             auto transition = nfa[index];
             if (transition[3] == firstRow[1])
             {
-                // Lambda add the to state id to M and eye
-                // lambdaM may be an issue adding to it like this
-                // may need to convert it to a true stack
-                S.push_back(transition[2]);
-                lambdaM.push_back(transition[2]);
+                // Check if in S already
+                if (!checkInS(S, transition[2]))
+                {
+                    // Lambda add the to state id to M and eye
+                    // lambdaM may be an issue adding to it like this
+                    // may need to convert it to a true stack
+                    S.push_back(transition[2]);
+                    lambdaM.push(transition[2]);
+                }
             }
         }
     }
@@ -210,7 +228,7 @@ bool isAccept(vector<string> B)
 }
 void parseAlphabet()
 {
-    for (int i = 1; i < firstRow.size(); i++)
+    for (int i = 2; i < firstRow.size(); i++)
     {
         alphabet.push_back(firstRow[i]);
     }
@@ -258,9 +276,9 @@ TransistionRow *getRow(vector<string> S)
 }
 void buildDFA()
 {
-    int counter = 0;
 
-    for (int i =0; i < transitionTable.size(); i++)
+    int counter = 0;
+    for (int i = 0; i < transitionTable.size(); i++)
     {
         transitionTable[i].id = counter;
         counter++;
@@ -301,6 +319,7 @@ void convertNFAtoDFA()
     bool start = true;
     firstRow = nfa[0];
     parseAlphabet();
+    findAcceptingStates();
     stack<vector<string>> localL;
     vector<string> i = {"0"};
 
@@ -602,44 +621,186 @@ void seg()
     }
 }
 
+void findOptions(vector<string> row, stack<int> *options, vector<int> *past)
+{
+
+    for (int i = 2; i < row.size(); i++)
+    {
+        if (row[i] != "E")
+        {
+            bool already = false;
+            for (auto seen : *past)
+            {
+                if (seen == stoi(row[i]))
+                {
+                    already = true;
+                }
+            }
+
+            if (!already)
+            {
+                // Potential path
+                options->push(stoi(row[i]));
+                past->push_back(stoi(row[i]));
+            }
+        }
+    }
+}
+
+vector<int> terminals()
+{
+    vector<int> finals;
+    for (auto row : dfa)
+    {
+        if (row[0] == "+")
+        {
+            finals.push_back(stoi(row[1]));
+        }
+    }
+    return finals;
+}
+
+bool inFinal(int potential)
+{
+    for (auto terminal : finals)
+    {
+        if (terminal == potential)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void deadStateHandling(vector<vector<string>> &dfa)
+{
+    finals = terminals();
+
+    for (int i = 0; i < dfa.size(); i++)
+    {
+
+        // Move the start row down incuding it in past iterate
+        vector<string> startRow = dfa[i];
+        stack<int> options;
+        vector<int> past;
+        past.push_back(stoi(startRow[1]));
+
+        findOptions(startRow, &options, &past);
+        while (options.size() > 0)
+        {
+            int option = options.top();
+            options.pop();
+            vector<string> row = dfa[option];
+            findOptions(row, &options, &past);
+        }
+        bool dead = true;
+        for (auto seen : past)
+        {
+            if (inFinal(seen))
+            {
+                // Fine path
+                dead = false;
+                break;
+            }
+        }
+        if (dead)
+        {
+            // Remove current start path may need to remove all refernces
+            // to it
+            dfa.erase(dfa.begin() + i);
+        }
+    }
+}
+
+vector<int> getStates()
+{
+    vector<int> states;
+    for (auto row: dfa)
+    {
+        states.push_back(stoi(row[1]));
+    }
+    return states;
+}
+
+void unreachableHandling(vector<vector<string>> &dfa)
+{
+    // Find list of all states that can be hit from start
+    vector<string> startRow = dfa[0];
+    stack<int> options;
+    vector<int> past;
+    vector<int> statesList = getStates();
+    past.push_back(stoi(startRow[1]));
+
+    findOptions(startRow, &options, &past);
+    while (options.size() > 0)
+    {
+        int option = options.top();
+        options.pop();
+        vector<string> row = dfa[option];
+        findOptions(row, &options, &past);
+    }
+
+    // past is lost of all states you can hit
+    for (int i = 0; i < statesList.size(); i++)
+    {
+        int state = statesList[i];
+        bool reachable = false;
+        for (auto seen : past)
+        {
+            if (state == seen)
+            {
+                reachable = true;
+                break;
+            }
+        }
+        if (!reachable)
+        {
+            // Remove state
+            dfa.erase(dfa.begin() + i);
+        }
+    }
+}
+
 int main(int argc, char **argv)
 {
-    // if (argc < 2)
-    // {
-    //     cout << "No input file given please provide \
-    //     absolute path to file"
-    //          << endl;
-    //     exit(1);
-    // }
-    // string inputFile = argv[1];
-    string inputFile = "/home/christian/Documents/Compilers/test-files/NF/cblock.nfa";
+    if (argc < 2)
+    {
+        cout << "No input file given please provide \
+        absolute path to file"
+             << endl;
+        exit(1);
+    }
+    string inputFile = argv[1];
+    // string inputFile = "/home/christian/Documents/Compilers/test-files/NF/cblock.nfa";
     load_file(inputFile);
     convertNFAtoDFA();
     // convertFormat();
-    printDFA();
-
-    // int lastSize = dfa.size();
-    // int currentSize = 0;
-    // int counter = 0;
-    // while (lastSize != currentSize)
-    // {
-    //     counter++;
-    //     // printDFA();
-    //     initialize();
-    //     // printL();
-    //     lastSize = dfa.size();
-
-    //     while (!L.empty())
-    //     {
-    //         seg();
-    //         // printL();
-    //         // cout << "Optimizing.." << endl;
-    //     }
-    //     merging(dfa);
-    //     currentSize = dfa.size();
-    // }
-
     // printDFA();
-    // cout << "Ran through " << counter << " time" << endl;
-    // saveFile("optimized.txt");
+
+    int lastSize = dfa.size();
+    int currentSize = 0;
+    int counter = 0;
+    while (lastSize != currentSize)
+    {
+        counter++;
+        // printDFA();
+        initialize();
+        // printL();
+        lastSize = dfa.size();
+
+        while (!L.empty())
+        {
+            seg();
+            // printL();
+            // cout << "Optimizing.." << endl;
+        }
+        merging(dfa);
+        currentSize = dfa.size();
+    }
+
+    deadStateHandling(dfa);
+    unreachableHandling(dfa);
+    printDFA();
+    cout << "Ran through " << counter << " time" << endl;
+    saveFile("optimized.txt");
 }
