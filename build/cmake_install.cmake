@@ -12,7 +12,7 @@ if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
     string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
            CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
   else()
-    set(CMAKE_INSTALL_CONFIG_NAME "Debug")
+    set(CMAKE_INSTALL_CONFIG_NAME "")
   endif()
   message(STATUS "Install configuration: \"${CMAKE_INSTALL_CONFIG_NAME}\"")
 endif()
@@ -38,25 +38,25 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  if(EXISTS "$ENV{DESTDIR}/usr/local/bin/dfa" AND
-     NOT IS_SYMLINK "$ENV{DESTDIR}/usr/local/bin/dfa")
+  if(EXISTS "$ENV{DESTDIR}/usr/local/bin/NFMATCH" AND
+     NOT IS_SYMLINK "$ENV{DESTDIR}/usr/local/bin/NFMATCH")
     file(RPATH_CHECK
-         FILE "$ENV{DESTDIR}/usr/local/bin/dfa"
+         FILE "$ENV{DESTDIR}/usr/local/bin/NFMATCH"
          RPATH "")
   endif()
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
-   "/usr/local/bin/dfa")
+   "/usr/local/bin/NFMATCH")
   if(CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(WARNING "ABSOLUTE path INSTALL DESTINATION : ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/usr/local/bin" TYPE EXECUTABLE FILES "/home/christian/Documents/Compilers/build/dfa")
-  if(EXISTS "$ENV{DESTDIR}/usr/local/bin/dfa" AND
-     NOT IS_SYMLINK "$ENV{DESTDIR}/usr/local/bin/dfa")
+file(INSTALL DESTINATION "/usr/local/bin" TYPE EXECUTABLE FILES "/home/christian/Documents/Compilers/build/NFMATCH")
+  if(EXISTS "$ENV{DESTDIR}/usr/local/bin/NFMATCH" AND
+     NOT IS_SYMLINK "$ENV{DESTDIR}/usr/local/bin/NFMATCH")
     if(CMAKE_INSTALL_DO_STRIP)
-      execute_process(COMMAND "/bin/strip" "$ENV{DESTDIR}/usr/local/bin/dfa")
+      execute_process(COMMAND "/bin/strip" "$ENV{DESTDIR}/usr/local/bin/NFMATCH")
     endif()
   endif()
 endif()

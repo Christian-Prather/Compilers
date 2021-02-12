@@ -157,17 +157,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named dfa
+# Target rules for targets named NFMATCH
 
 # Build rule for target.
-dfa: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 dfa
-.PHONY : dfa
+NFMATCH: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 NFMATCH
+.PHONY : NFMATCH
 
 # fast build rule for target.
-dfa/fast:
-	$(MAKE) -f CMakeFiles/dfa.dir/build.make CMakeFiles/dfa.dir/build
-.PHONY : dfa/fast
+NFMATCH/fast:
+	$(MAKE) -f CMakeFiles/NFMATCH.dir/build.make CMakeFiles/NFMATCH.dir/build
+.PHONY : NFMATCH/fast
 
 optimization.o: optimization.cpp.o
 
@@ -175,7 +175,7 @@ optimization.o: optimization.cpp.o
 
 # target to build an object file
 optimization.cpp.o:
-	$(MAKE) -f CMakeFiles/dfa.dir/build.make CMakeFiles/dfa.dir/optimization.cpp.o
+	$(MAKE) -f CMakeFiles/NFMATCH.dir/build.make CMakeFiles/NFMATCH.dir/optimization.cpp.o
 .PHONY : optimization.cpp.o
 
 optimization.i: optimization.cpp.i
@@ -184,7 +184,7 @@ optimization.i: optimization.cpp.i
 
 # target to preprocess a source file
 optimization.cpp.i:
-	$(MAKE) -f CMakeFiles/dfa.dir/build.make CMakeFiles/dfa.dir/optimization.cpp.i
+	$(MAKE) -f CMakeFiles/NFMATCH.dir/build.make CMakeFiles/NFMATCH.dir/optimization.cpp.i
 .PHONY : optimization.cpp.i
 
 optimization.s: optimization.cpp.s
@@ -193,7 +193,7 @@ optimization.s: optimization.cpp.s
 
 # target to generate assembly for a file
 optimization.cpp.s:
-	$(MAKE) -f CMakeFiles/dfa.dir/build.make CMakeFiles/dfa.dir/optimization.cpp.s
+	$(MAKE) -f CMakeFiles/NFMATCH.dir/build.make CMakeFiles/NFMATCH.dir/optimization.cpp.s
 .PHONY : optimization.cpp.s
 
 # Help Target
@@ -208,7 +208,7 @@ help:
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... dfa"
+	@echo "... NFMATCH"
 	@echo "... optimization.o"
 	@echo "... optimization.i"
 	@echo "... optimization.s"

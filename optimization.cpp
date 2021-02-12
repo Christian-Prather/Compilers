@@ -163,16 +163,19 @@ void followLabda(vector<string> &S)
         for (auto index : indexes)
         {
             auto transition = nfa[index];
-            if (transition[3] == firstRow[1])
+            for (int i = 3; i < transition.size(); i++)
             {
-                // Check if in S already
-                if (!checkInS(S, transition[2]))
+                if (transition[i] == firstRow[1])
                 {
-                    // Lambda add the to state id to M and eye
-                    // lambdaM may be an issue adding to it like this
-                    // may need to convert it to a true stack
-                    S.push_back(transition[2]);
-                    lambdaM.push(transition[2]);
+                    // Check if in S already
+                    if (!checkInS(S, transition[2]))
+                    {
+                        // Lambda add the to state id to M and eye
+                        // lambdaM may be an issue adding to it like this
+                        // may need to convert it to a true stack
+                        S.push_back(transition[2]);
+                        lambdaM.push(transition[2]);
+                    }
                 }
             }
         }
@@ -188,9 +191,12 @@ vector<string> followChar(vector<string> S, string c)
         for (auto index : indexes)
         {
             auto row = nfa[index];
-            if (row[3] == c)
+            for (int i = 3; i < row.size(); i++)
             {
-                F.push_back(row[2]);
+                if (row[i] == c)
+                {
+                    F.push_back(row[2]);
+                }
             }
         }
     }
@@ -715,7 +721,7 @@ void deadStateHandling(vector<vector<string>> &dfa)
 vector<int> getStates()
 {
     vector<int> states;
-    for (auto row: dfa)
+    for (auto row : dfa)
     {
         states.push_back(stoi(row[1]));
     }
@@ -760,17 +766,30 @@ void unreachableHandling(vector<vector<string>> &dfa)
         }
     }
 }
-
+int findAlpha(string input)
+{
+    int unreachable = 10000;
+    // cout << "Token " << input << endl;
+    for (int i = 2; i < firstRow.size(); i++)
+    {
+        if (input == firstRow[i])
+        {
+            // cout << "RETURNING " << i << endl;
+            return i;
+        }
+    }
+    return unreachable;
+}
 int main(int argc, char **argv)
 {
-    if (argc < 2)
+    if (argc < 3)
     {
-        cout << "No input file given please provide \
-        absolute path to file"
+        cout << "incorrect number of arguments"
              << endl;
         exit(1);
     }
     string inputFile = argv[1];
+    string outputFile = argv[2];
     // string inputFile = "/home/christian/Documents/Compilers/test-files/NF/cblock.nfa";
     load_file(inputFile);
     convertNFAtoDFA();
@@ -798,9 +817,70 @@ int main(int argc, char **argv)
         currentSize = dfa.size();
     }
 
-    deadStateHandling(dfa);
-    unreachableHandling(dfa);
-    printDFA();
-    cout << "Ran through " << counter << " time" << endl;
-    saveFile("optimized.txt");
+    // deadStateHandling(dfa);
+    // unreachableHandling(dfa);
+    // printDFA();
+    // cout << "Ran through " << counter << " time" << endl;
+    for (int i = 3; i < argc; i++)
+    {
+        cout << "..." << endl;
+        vector<string> input;
+
+        istringstream ss(argv[i]);
+        for (string s; ss >> s;)
+        {
+            input.push_back(s);
+        }
+        if (input.empty())
+        {
+            cout << "OUTPUT " << 0 << endl;
+            continue;
+        }
+        int spot = 1;
+        bool match = true;
+        vector<string> row = dfa[0];
+
+        for (auto token : input)
+        {
+
+            for (auto letter : token)
+            {
+                string sLetter;
+                sLetter += letter;
+                // cout << "ScREW: " << sLetter << endl;
+                int alphabetIndex = findAlpha(sLetter);
+
+                // int transition = stoi(dfa[0][alphabetIndex]);
+                //         vector<string> row = dfa[transition];
+
+                if (alphabetIndex == 10000 | row[alphabetIndex] == "E")
+                {
+                    cout << "OUTPUT " << spot << endl;
+                    match = false;
+                    break;
+                }
+                else
+                {
+                    // cout << "GGGGGGGGGGGGGGG"
+                    //      << " " << alphabetIndex << " " << row[alphabetIndex];
+                    row = dfa[stoi(row[alphabetIndex])];
+                }
+
+                spot++;
+            }
+            if (match)
+            {
+                if (row[0] == "+")
+                {
+                    cout << "OUTPUT :M:" << endl;
+                }
+                else
+                {
+                    cout << "OUTPUT " << spot << endl;
+                }
+            }
+        }
+    }
+    cout << "..." << endl;
+    saveFile(outputFile);
 }

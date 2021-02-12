@@ -53,7 +53,7 @@ CMAKE_BINARY_DIR = /home/christian/Documents/Compilers/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/dfa.dir/all
+all: CMakeFiles/NFMATCH.dir/all
 
 .PHONY : all
 
@@ -63,36 +63,36 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/dfa.dir/clean
+clean: CMakeFiles/NFMATCH.dir/clean
 
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/dfa.dir
+# Target rules for target CMakeFiles/NFMATCH.dir
 
 # All Build rule for target.
-CMakeFiles/dfa.dir/all:
-	$(MAKE) -f CMakeFiles/dfa.dir/build.make CMakeFiles/dfa.dir/depend
-	$(MAKE) -f CMakeFiles/dfa.dir/build.make CMakeFiles/dfa.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/christian/Documents/Compilers/build/CMakeFiles --progress-num=1,2 "Built target dfa"
-.PHONY : CMakeFiles/dfa.dir/all
+CMakeFiles/NFMATCH.dir/all:
+	$(MAKE) -f CMakeFiles/NFMATCH.dir/build.make CMakeFiles/NFMATCH.dir/depend
+	$(MAKE) -f CMakeFiles/NFMATCH.dir/build.make CMakeFiles/NFMATCH.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/christian/Documents/Compilers/build/CMakeFiles --progress-num=1,2 "Built target NFMATCH"
+.PHONY : CMakeFiles/NFMATCH.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/dfa.dir/rule: cmake_check_build_system
+CMakeFiles/NFMATCH.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/christian/Documents/Compilers/build/CMakeFiles 2
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/dfa.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/NFMATCH.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/christian/Documents/Compilers/build/CMakeFiles 0
-.PHONY : CMakeFiles/dfa.dir/rule
+.PHONY : CMakeFiles/NFMATCH.dir/rule
 
 # Convenience name for target.
-dfa: CMakeFiles/dfa.dir/rule
+NFMATCH: CMakeFiles/NFMATCH.dir/rule
 
-.PHONY : dfa
+.PHONY : NFMATCH
 
 # clean rule for target.
-CMakeFiles/dfa.dir/clean:
-	$(MAKE) -f CMakeFiles/dfa.dir/build.make CMakeFiles/dfa.dir/clean
-.PHONY : CMakeFiles/dfa.dir/clean
+CMakeFiles/NFMATCH.dir/clean:
+	$(MAKE) -f CMakeFiles/NFMATCH.dir/build.make CMakeFiles/NFMATCH.dir/clean
+.PHONY : CMakeFiles/NFMATCH.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
