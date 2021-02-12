@@ -68,6 +68,10 @@ void load_file(string filePath)
 {
     string line;
     ifstream inputFile(filePath);
+    if (!inputFile)
+    {
+        exit(1);
+    }
     vector<string> entries;
     // bool firstLine = true;
 

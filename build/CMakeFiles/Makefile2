@@ -53,7 +53,7 @@ CMAKE_BINARY_DIR = /home/christian/Documents/Compilers/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/NFMATCH.dir/all
+all: CMakeFiles/NFAMATCH.dir/all
 
 .PHONY : all
 
@@ -63,36 +63,36 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/NFMATCH.dir/clean
+clean: CMakeFiles/NFAMATCH.dir/clean
 
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/NFMATCH.dir
+# Target rules for target CMakeFiles/NFAMATCH.dir
 
 # All Build rule for target.
-CMakeFiles/NFMATCH.dir/all:
-	$(MAKE) -f CMakeFiles/NFMATCH.dir/build.make CMakeFiles/NFMATCH.dir/depend
-	$(MAKE) -f CMakeFiles/NFMATCH.dir/build.make CMakeFiles/NFMATCH.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/christian/Documents/Compilers/build/CMakeFiles --progress-num=1,2 "Built target NFMATCH"
-.PHONY : CMakeFiles/NFMATCH.dir/all
+CMakeFiles/NFAMATCH.dir/all:
+	$(MAKE) -f CMakeFiles/NFAMATCH.dir/build.make CMakeFiles/NFAMATCH.dir/depend
+	$(MAKE) -f CMakeFiles/NFAMATCH.dir/build.make CMakeFiles/NFAMATCH.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/christian/Documents/Compilers/build/CMakeFiles --progress-num=1,2 "Built target NFAMATCH"
+.PHONY : CMakeFiles/NFAMATCH.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/NFMATCH.dir/rule: cmake_check_build_system
+CMakeFiles/NFAMATCH.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/christian/Documents/Compilers/build/CMakeFiles 2
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/NFMATCH.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/NFAMATCH.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/christian/Documents/Compilers/build/CMakeFiles 0
-.PHONY : CMakeFiles/NFMATCH.dir/rule
+.PHONY : CMakeFiles/NFAMATCH.dir/rule
 
 # Convenience name for target.
-NFMATCH: CMakeFiles/NFMATCH.dir/rule
+NFAMATCH: CMakeFiles/NFAMATCH.dir/rule
 
-.PHONY : NFMATCH
+.PHONY : NFAMATCH
 
 # clean rule for target.
-CMakeFiles/NFMATCH.dir/clean:
-	$(MAKE) -f CMakeFiles/NFMATCH.dir/build.make CMakeFiles/NFMATCH.dir/clean
-.PHONY : CMakeFiles/NFMATCH.dir/clean
+CMakeFiles/NFAMATCH.dir/clean:
+	$(MAKE) -f CMakeFiles/NFAMATCH.dir/build.make CMakeFiles/NFAMATCH.dir/clean
+.PHONY : CMakeFiles/NFAMATCH.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
