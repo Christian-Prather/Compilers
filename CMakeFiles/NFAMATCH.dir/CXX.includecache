@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/christian/Documents/Compilers/optimization.cpp
+iostream
+-
+fstream
+-
+vector
+-
+set
+-
+tuple
+-
+stack
+-
+sstream
+-
+map
+-
+
