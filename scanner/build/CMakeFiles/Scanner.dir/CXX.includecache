@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/christian/Documents/Compilers/scanner/scanner.cpp
+iostream
+-
+fstream
+-
+vector
+-
+sstream
+-
+set
+-
+

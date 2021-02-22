@@ -1,0 +1,1 @@
+/usr/bin/c++   -pthread  -rdynamic CMakeFiles/Scanner.dir/scanner.cpp.o  -o Scanner 

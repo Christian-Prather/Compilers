@@ -1,0 +1,7 @@
+/home/christian/Documents/Compilers/scanner/build/CMakeFiles/install/strip.dir
+/home/christian/Documents/Compilers/scanner/build/CMakeFiles/install.dir
+/home/christian/Documents/Compilers/scanner/build/CMakeFiles/list_install_components.dir
+/home/christian/Documents/Compilers/scanner/build/CMakeFiles/rebuild_cache.dir
+/home/christian/Documents/Compilers/scanner/build/CMakeFiles/edit_cache.dir
+/home/christian/Documents/Compilers/scanner/build/CMakeFiles/install/local.dir
+/home/christian/Documents/Compilers/scanner/build/CMakeFiles/Scanner.dir

@@ -4,6 +4,12 @@
         "string": "cpp",
         "vector": "cpp",
         "ostream": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "set": "cpp",
+        "tuple": "cpp",
+        "stack": "cpp",
+        "sstream": "cpp",
+        "fstream": "cpp",
+        "map": "cpp"
     }
 }
