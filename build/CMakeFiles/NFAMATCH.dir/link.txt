@@ -1,1 +1,1 @@
-/usr/bin/c++   -pthread  -rdynamic CMakeFiles/NFAMATCH.dir/optimization.cpp.o  -o NFAMATCH 
+/bin/g++-9   -pthread -g  -rdynamic CMakeFiles/NFAMATCH.dir/optimization.cpp.o  -o NFAMATCH 

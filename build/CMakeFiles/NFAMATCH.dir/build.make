@@ -60,15 +60,15 @@ include CMakeFiles/NFAMATCH.dir/flags.make
 CMakeFiles/NFAMATCH.dir/optimization.cpp.o: CMakeFiles/NFAMATCH.dir/flags.make
 CMakeFiles/NFAMATCH.dir/optimization.cpp.o: ../optimization.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/christian/Documents/Compilers/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/NFAMATCH.dir/optimization.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NFAMATCH.dir/optimization.cpp.o -c /home/christian/Documents/Compilers/optimization.cpp
+	/bin/g++-9  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NFAMATCH.dir/optimization.cpp.o -c /home/christian/Documents/Compilers/optimization.cpp
 
 CMakeFiles/NFAMATCH.dir/optimization.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/NFAMATCH.dir/optimization.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/christian/Documents/Compilers/optimization.cpp > CMakeFiles/NFAMATCH.dir/optimization.cpp.i
+	/bin/g++-9 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/christian/Documents/Compilers/optimization.cpp > CMakeFiles/NFAMATCH.dir/optimization.cpp.i
 
 CMakeFiles/NFAMATCH.dir/optimization.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/NFAMATCH.dir/optimization.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/christian/Documents/Compilers/optimization.cpp -o CMakeFiles/NFAMATCH.dir/optimization.cpp.s
+	/bin/g++-9 $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/christian/Documents/Compilers/optimization.cpp -o CMakeFiles/NFAMATCH.dir/optimization.cpp.s
 
 # Object files for target NFAMATCH
 NFAMATCH_OBJECTS = \
