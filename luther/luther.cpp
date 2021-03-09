@@ -1,3 +1,8 @@
+// Need to identify the final state and non final states 
+// Add field to tables row 
+// Change check to be if was in fianl then went back its done
+
+
 #include <string>
 #include <fstream>
 #include <vector>
