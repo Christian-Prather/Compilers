@@ -1,3 +1,5 @@
+// Merging after state clean uop
+
 /**
  * @file optimization.cpp
  * @author Christian Prather
@@ -330,6 +332,7 @@ void buildDFA()
 }
 void convertNFAtoDFA()
 {
+    // Redo moving 
     bool start = true;
     firstRow = nfa[0];
     parseAlphabet();
@@ -478,6 +481,8 @@ void initialize()
     L.insert(L.begin(), nonAcceptingStates);
 }
 
+
+// Fix this merging so that the 
 void merging(vector<vector<string>> &dfa)
 {
     // cout << "Initial Size " << dfa.size() << endl;
