@@ -1,7 +1,6 @@
-// Need to identify the final state and non final states 
-// Add field to tables row 
+// Need to identify the final state and non final states
+// Add field to tables row
 // Change check to be if was in fianl then went back its done
-
 
 #include <string>
 #include <fstream>
@@ -85,7 +84,7 @@ Table readTable(string filePath, string token)
         // to the table
         int key = stoi(fullRow[1]);
         vector<string> &row = currentTable.rows[key];
-        for (int i = 2; i < fullRow.size(); i++)
+        for (int i = 0; i < fullRow.size(); i++)
         {
             row.push_back(fullRow[i]);
         }
@@ -171,10 +170,40 @@ int getHeaderColumn(char character)
         tmp += character;
         if (asciiHeader[i] == tmp)
         {
-            return i;
+            return i + 2; // Two offset since transistion table has is first row as terminal indicator and second as id
         }
     }
     return -1;
+}
+
+void updateCounter(string token)
+{
+    for (auto &table : transitionTables)
+    {
+        if (table.token == token)
+        {
+            table.counter++;
+        }
+    }
+}
+
+void resetCounters()
+{
+    for (auto &table : transitionTables)
+    {
+        table.counter = 0;
+    }
+}
+
+void resetSingleCounter(string token)
+{
+    for (auto &table : transitionTables)
+    {
+        if (table.token == token)
+        {
+            table.counter = 0;
+        }
+       }
 }
 
 void processSource()
@@ -198,16 +227,63 @@ void processSource()
             vector<string> &row = potentialTable.rows[potentialTable.currentRowId];
             if (row[column] != "E")
             {
-                // Is a match update the current row id and add to matching list
-                potentialTable.currentRowId = stoi(row[column]);
-                matchingList.push_back(potentialTable);
+                // Is a valid transistion check if its from a final row to a non final
+                if (potentialTable.isFinal)
+                {
+                    if (row[0] == "+")
+                    {
+                        potentialTable.currentRowId = stoi(row[column]);
+                        matchingList.push_back(potentialTable);
+                        potentialTable.isFinal = true;
+                        // Need to update the transistion table counter for this table
+                        updateCounter(potentialTable.token);
+                    }
+                    else
+                    {
+                        resetSingleCounter(potentialTable.token);
+                    }
+                }
+                else
+                {
+                    // Is a match update the current row id and add to matching list
+                    potentialTable.currentRowId = stoi(row[column]);
+                    if (row[0] == "+")
+                    {
+                        potentialTable.isFinal = true;
+                    }
+                    matchingList.push_back(potentialTable);
+                    potentialTable.isFinal = false;
+                    updateCounter(potentialTable.token);
+                }
+            }
+            else
+            {
+                if (!potentialTable.isFinal)
+                {
+                    // Not an option anymore
+                    resetSingleCounter(potentialTable.token);
+                }
             }
         }
         if (matchingList.size() == 0)
         {
             // We found longest token
-            Table longestTokenTable = masterList[0];
-            cout << "Longest match: " << longestTokenTable.token << endl;
+            // Table longestTokenTable = masterList[0];
+            // cout << "Longest match: " << longestTokenTable.token << endl;
+
+            Table longestTable;
+            for (int i = transitionTables.size() - 1; i >= 0; i--)
+            {
+                auto table = transitionTables[i];
+                if (table.counter >= longestTable.counter)
+                {
+                    longestTable = table;
+                }
+            }
+
+            cout << "Longest match: " << longestTable.token << endl;
+
+            resetCounters();
             masterList = transitionTables;
         }
         else
@@ -219,16 +295,16 @@ void processSource()
 
 int main(int argc, char **argv)
 {
-    if (argc < 4)
-        // {
-        //     cout << "Not enough arguments..." << endl;
-        //     return -1;
-        // }
+    // if (argc < 4)
+    // {
+    //     cout << "Not enough arguments..." << endl;
+    //     return -1;
+    // }
 
-        // scanFile = argv[1];
-        // sourceFile = argv[2];
-        // tokensFile = argv[3];
-        scanFile = "../wiki/scan.u";
+    // scanFile = argv[1];
+    // sourceFile = argv[2];
+    // tokensFile = argv[3];
+    scanFile = "../wiki/scan.u";
     sourceFile = "../wiki/program.src";
     loadScanFile(scanFile);
     loadTables();
