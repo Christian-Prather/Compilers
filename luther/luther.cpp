@@ -203,7 +203,7 @@ void resetSingleCounter(string token)
         {
             table.counter = 0;
         }
-       }
+    }
 }
 
 void processSource()
@@ -247,12 +247,15 @@ void processSource()
                 {
                     // Is a match update the current row id and add to matching list
                     potentialTable.currentRowId = stoi(row[column]);
-                    if (row[0] == "+")
+                    if (potentialTable.rows[potentialTable.currentRowId][0] == "+")
                     {
                         potentialTable.isFinal = true;
                     }
+                    else
+                    {
+                        potentialTable.isFinal = false;
+                    }
                     matchingList.push_back(potentialTable);
-                    potentialTable.isFinal = false;
                     updateCounter(potentialTable.token);
                 }
             }
