@@ -41,7 +41,6 @@ vector<char> inputStream;
 void loadScanFile(string filePath)
 {
     bool firstLine = true;
-
     string line;
     ifstream inputFile(filePath);
     if (!inputFile)
@@ -69,6 +68,10 @@ void loadScanFile(string filePath)
             row.push_back(s);
         }
         scannerLookup.rows.push_back(row);
+    }
+    if (firstLine)
+    {
+        exit(-1);
     }
     inputFile.close();
 }
