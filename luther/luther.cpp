@@ -6,7 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
-
+#include <map>
 #include "helpers.h"
 
 using namespace std;
@@ -16,13 +16,17 @@ struct CurrentMatch
     /* data */
     string key;
     int tokenLength;
-    int startLine = 1;
-    int characterIndex = 1;
+    int startCharacterIndex = 0;
+    int endingCharacterIndex = 0;
+    int lineSpecificCharacterIndex = 1;
 };
+map<string, string> hexadecemilValues;
+map<string, string> tokenMappings;
 
 string scanFile, sourceFile, tokensFile;
 string tokensHex;
 vector<string> asciiHeader;
+vector<string> preConverted;
 
 deque<Table> transitionTables;
 
@@ -42,6 +46,7 @@ void loadScanFile(string filePath)
     ifstream inputFile(filePath);
     if (!inputFile)
     {
+        cout << "Cant open scan file " << endl;
         exit(1);
     }
     while (getline(inputFile, line))
@@ -73,7 +78,7 @@ Table readTable(string filePath, string token)
 {
     Table currentTable;
     string line;
-    filePath = "../" + filePath;
+    // filePath = "../" + filePath;
     ifstream inputFile(filePath);
 
     if (!inputFile)
@@ -109,6 +114,12 @@ void loadTables()
     {
         string tablePath = row[0];
         string token = row[1];
+        if (row.size() == 3)
+        {
+            // Add alternative
+            tokenMappings.insert(pair<string, string>(token, row[2]));
+        }
+
         auto transitionTable = readTable(tablePath, token);
         transitionTables.push_back(transitionTable);
     }
@@ -154,21 +165,24 @@ void convertHeader()
             i += 2;
             char tempAscii = stoul(hexCharacter, nullptr, 16);
             asciiCharacter += tempAscii;
+            hexadecemilValues.insert(pair<string, string>(asciiCharacter, "x" + hexCharacter));
         }
         else
         {
             asciiCharacter = tokensHex[i];
+            hexadecemilValues.insert(pair<string, string>(asciiCharacter, asciiCharacter));
+
+            // preConverted.push_back(asciiCharacter);
         }
 
         asciiHeader.push_back(asciiCharacter);
     }
-
-    // Print
-    for (auto character : asciiHeader)
-    {
-        cout << character << ", ";
-    }
-    cout << endl;
+    // // Print
+    // for (auto character : asciiHeader)
+    // {
+    //     cout << character << ", ";
+    // }
+    // cout << endl;
 }
 
 int getHeaderColumn(char character)
@@ -215,8 +229,31 @@ void resetSingleCounter(string token)
     }
 }
 
-void processSource()
+bool needsConversion(string character)
 {
+    for (auto preSet : preConverted)
+    {
+        if (preSet == character)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool hasAlternative(string token)
+{
+    if (tokenMappings.count(token) > 0)
+    {
+        return true;
+    }
+    return false;
+}
+
+void processSource(string outputFile)
+{
+    ofstream tokenFile;
+    tokenFile.open(outputFile);
     CurrentMatch currentMatch;
     int line = 1;
     // Copy I hope??
@@ -236,9 +273,9 @@ void processSource()
         deque<Table> matchingList;
 
         // Go through the master list backwards to ensure priority
-        for (int i = masterList.size() - 1; i >= 0; i--)
+        for (int j = masterList.size() - 1; j >= 0; j--)
         {
-            auto potentialTable = masterList[i];
+            auto potentialTable = masterList[j];
             vector<string> &row = potentialTable.rows[potentialTable.currentRowId];
             if (row[column] != "E")
             {
@@ -278,9 +315,9 @@ void processSource()
                 if (potentialTable.rows[potentialTable.currentRowId][0] == "+")
                 {
                     // Was a entrence to an accepting state can be the current highest length token
-                    currentMatch.tokenLength = count;
+                    currentMatch.tokenLength = count; // single token lenght
                     currentMatch.key = potentialTable.token;
-                    currentMatch.startLine = line;
+                    currentMatch.endingCharacterIndex = i;
                 }
             }
             // else
@@ -312,47 +349,86 @@ void processSource()
 
             // resetCounters();
             // masterList = transitionTables;
-            // int lineCounter = 1;
-            // for (int i = 0; i < currentMatch.length; i++)
-            // {
-            //     auto character = inputStream[i];
-            //     if (character == '\n')
-            //     {
-            //         lineCounter++;
-            //     }
-            // }
+            int lineCounter = 1;
+            for (int i = 0; i < currentMatch.startCharacterIndex; i++)
+            {
+                auto character = inputStream[i];
+                if (character == '\n')
+                {
+                    lineCounter++;
+                    currentMatch.lineSpecificCharacterIndex = currentMatch.startCharacterIndex - i;
+                }
+            }
+            if (lineCounter == 1)
+            {
+                currentMatch.lineSpecificCharacterIndex = currentMatch.startCharacterIndex + 1;
+            }
+            tokenFile << currentMatch.key << " ";
+            // cout << currentMatch.key << endl;
+            // Not hard coded but list of ones with alternatives
+            if (!hasAlternative(currentMatch.key))
+            {
+                for (int i = currentMatch.startCharacterIndex; i <= currentMatch.endingCharacterIndex; i++)
+                {
+                    string tmp = "";
+                    tmp += inputStream[i];
+                    // if (needsConversion(tmp))
+                    // {
+                    //     // Hex version
+                    //     cout << "x" << int(inputStream[i]);
+                    // }
+                    // else
+                    // {
+                    //     cout << inputStream[i];
+                    // }
+                    tokenFile << hexadecemilValues[tmp];
+                }
+            }
+            else
+            {
+                tokenFile << tokenMappings[currentMatch.key];
+            }
 
-            cout << "Longest match: " << currentMatch.key << " "  << " " << currentMatch.characterIndex << endl;
-            i = currentMatch.tokenLength - 1;
+            tokenFile << " " << lineCounter << " " << currentMatch.lineSpecificCharacterIndex << endl;
+
+            i = currentMatch.endingCharacterIndex;
+            currentMatch.startCharacterIndex += currentMatch.tokenLength;
             count = 0;
             masterList = transitionTables;
-            line = currentMatch.startLine - 1;
         }
         else
         {
             masterList = matchingList;
         }
+
+        // if (character == '\n')
+        // {
+        //     line++;
+        // }
     }
+    tokenFile.close();
 }
 
 int main(int argc, char **argv)
 {
-    // if (argc < 4)
-    // {
-    //     cout << "Not enough arguments..." << endl;
-    //     return -1;
-    // }
+    if (argc < 4)
+    {
+        cout << "Not enough arguments..." << endl;
+        return -1;
+    }
 
-    // scanFile = argv[1];
-    // sourceFile = argv[2];
-    // tokensFile = argv[3];
-    scanFile = "../wiki/scan.u";
-    sourceFile = "../wiki/program.src";
+    scanFile = argv[1];
+    sourceFile = argv[2];
+    tokensFile = argv[3];
+
+    // cout << scanFile << " " << sourceFile << " " << tokensFile << endl;
+    // scanFile = "../wiki/scan.u";
+    // sourceFile = "../wiki/program.src";
     loadScanFile(scanFile);
     loadTables();
-    printTables(transitionTables);
+    // printTables(transitionTables);
     loadSource(sourceFile);
     convertHeader();
 
-    processSource();
+    processSource(tokensFile);
 }
