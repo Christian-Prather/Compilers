@@ -322,9 +322,9 @@ void processSource()
             //     }
             // }
 
-            cout << "Longest match: " << currentMatch.key << " " << lineCounter << " " << currentMatch.characterIndex << endl;
+            cout << "Longest match: " << currentMatch.key << " "  << " " << currentMatch.characterIndex << endl;
             i = currentMatch.tokenLength - 1;
-            count = currentMatch.tokenLength;
+            count = 0;
             masterList = transitionTables;
             line = currentMatch.startLine - 1;
         }
