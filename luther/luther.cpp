@@ -11,6 +11,15 @@
 
 using namespace std;
 
+struct CurrentMatch
+{
+    /* data */
+    string key;
+    int tokenLength;
+    int startLine = 1;
+    int characterIndex = 1;
+};
+
 string scanFile, sourceFile, tokensFile;
 string tokensHex;
 vector<string> asciiHeader;
@@ -208,11 +217,16 @@ void resetSingleCounter(string token)
 
 void processSource()
 {
+    CurrentMatch currentMatch;
+    int line = 1;
     // Copy I hope??
     deque<Table> masterList = transitionTables;
-
-    for (auto character : inputStream)
+    int count = 0;
+    for (int i = 0; i < inputStream.size(); i++)
     {
+        auto character = inputStream[i];
+
+        count++;
         int column = getHeaderColumn(character);
         if (column < 0)
         {
@@ -221,73 +235,98 @@ void processSource()
         }
         deque<Table> matchingList;
 
-        for (int i = 0; i < masterList.size(); i++)
+        // Go through the master list backwards to ensure priority
+        for (int i = masterList.size() - 1; i >= 0; i--)
         {
             auto potentialTable = masterList[i];
             vector<string> &row = potentialTable.rows[potentialTable.currentRowId];
             if (row[column] != "E")
             {
-                // Is a valid transistion check if its from a final row to a non final
-                if (potentialTable.isFinal)
+                // // Is a valid transistion check if its from a final row to a non final
+                // if (potentialTable.isFinal)
+                // {
+                //     if (row[0] == "+")
+                //     {
+                potentialTable.currentRowId = stoi(row[column]);
+                matchingList.push_front(potentialTable);
+                //         potentialTable.isFinal = true;
+                //         // Need to update the transistion table counter for this table
+                //         updateCounter(potentialTable.token);
+                //     }
+                //     else
+                //     {
+                //         resetSingleCounter(potentialTable.token);
+                //     }
+                // }
+                // else
+                // {
+                //     // Is a match update the current row id and add to matching list
+                //     potentialTable.currentRowId = stoi(row[column]);
+                //     if (potentialTable.rows[potentialTable.currentRowId][0] == "+")
+                //     {
+                //         potentialTable.isFinal = true;
+                //     }
+                //     else
+                //     {
+                //         potentialTable.isFinal = false;
+                //     }
+                //     matchingList.push_back(potentialTable);
+                //     updateCounter(potentialTable.token);
+                // }
+
+                // Check if next transition puts us in an accepting state
+                if (potentialTable.rows[potentialTable.currentRowId][0] == "+")
                 {
-                    if (row[0] == "+")
-                    {
-                        potentialTable.currentRowId = stoi(row[column]);
-                        matchingList.push_back(potentialTable);
-                        potentialTable.isFinal = true;
-                        // Need to update the transistion table counter for this table
-                        updateCounter(potentialTable.token);
-                    }
-                    else
-                    {
-                        resetSingleCounter(potentialTable.token);
-                    }
-                }
-                else
-                {
-                    // Is a match update the current row id and add to matching list
-                    potentialTable.currentRowId = stoi(row[column]);
-                    if (potentialTable.rows[potentialTable.currentRowId][0] == "+")
-                    {
-                        potentialTable.isFinal = true;
-                    }
-                    else
-                    {
-                        potentialTable.isFinal = false;
-                    }
-                    matchingList.push_back(potentialTable);
-                    updateCounter(potentialTable.token);
+                    // Was a entrence to an accepting state can be the current highest length token
+                    currentMatch.tokenLength = count;
+                    currentMatch.key = potentialTable.token;
+                    currentMatch.startLine = line;
                 }
             }
-            else
-            {
-                if (!potentialTable.isFinal)
-                {
-                    // Not an option anymore
-                    resetSingleCounter(potentialTable.token);
-                }
-            }
+            // else
+            // {
+            //     if (!potentialTable.isFinal)
+            //     {
+            //         // Not an option anymore
+            //         resetSingleCounter(potentialTable.token);
+            //     }
+            // }
         }
-        if (matchingList.size() == 0)
+        if (matchingList.size() == 0 || (i == inputStream.size() - 1))
         {
             // We found longest token
             // Table longestTokenTable = masterList[0];
             // cout << "Longest match: " << longestTokenTable.token << endl;
 
-            Table longestTable;
-            for (int i = transitionTables.size() - 1; i >= 0; i--)
-            {
-                auto table = transitionTables[i];
-                if (table.counter >= longestTable.counter)
-                {
-                    longestTable = table;
-                }
-            }
+            // Table longestTable;
+            // for (int i = transitionTables.size() - 1; i >= 0; i--)
+            // {
+            //     auto table = transitionTables[i];
+            //     if (table.counter >= longestTable.counter)
+            //     {
+            //         longestTable = table;
+            //     }
+            // }
 
-            cout << "Longest match: " << longestTable.token << endl;
+            // cout << "Longest match: " << longestTable.token << endl;
 
-            resetCounters();
+            // resetCounters();
+            // masterList = transitionTables;
+            // int lineCounter = 1;
+            // for (int i = 0; i < currentMatch.length; i++)
+            // {
+            //     auto character = inputStream[i];
+            //     if (character == '\n')
+            //     {
+            //         lineCounter++;
+            //     }
+            // }
+
+            cout << "Longest match: " << currentMatch.key << " " << lineCounter << " " << currentMatch.characterIndex << endl;
+            i = currentMatch.tokenLength - 1;
+            count = currentMatch.tokenLength;
             masterList = transitionTables;
+            line = currentMatch.startLine - 1;
         }
         else
         {
