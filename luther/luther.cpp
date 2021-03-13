@@ -417,7 +417,7 @@ int main(int argc, char **argv)
     if (argc < 4)
     {
         // cout << "Not enough arguments..." << endl;
-        return -1;
+        exit(-1);
     }
 
     scanFile = argv[1];
