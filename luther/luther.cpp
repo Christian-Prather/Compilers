@@ -46,7 +46,6 @@ void loadScanFile(string filePath)
     ifstream inputFile(filePath);
     if (!inputFile)
     {
-        cout << "Cant open scan file " << endl;
         exit(1);
     }
     while (getline(inputFile, line))
@@ -129,6 +128,10 @@ void loadSource(string filePath)
 {
     ifstream sourceFile;
     sourceFile.open(filePath);
+    if (!sourceFile)
+    {
+        exit(1);
+    }
     char data;
     while (sourceFile.get(data))
     {
@@ -267,7 +270,7 @@ void processSource(string outputFile)
         int column = getHeaderColumn(character);
         if (column < 0)
         {
-            cout << "Index error" << endl;
+            // cout << "Index error" << endl;
             exit(1);
         }
         deque<Table> matchingList;
@@ -413,7 +416,7 @@ int main(int argc, char **argv)
 {
     if (argc < 4)
     {
-        cout << "Not enough arguments..." << endl;
+        // cout << "Not enough arguments..." << endl;
         return -1;
     }
 
