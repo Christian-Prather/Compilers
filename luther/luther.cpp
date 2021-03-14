@@ -26,7 +26,6 @@ map<string, string> tokenMappings;
 string scanFile, sourceFile, tokensFile;
 string tokensHex;
 vector<string> asciiHeader;
-vector<string> preConverted;
 
 deque<Table> transitionTables;
 
@@ -138,18 +137,6 @@ void loadSource(string filePath)
     char data;
     while (sourceFile.get(data))
     {
-        // if (data == ' ')
-        // {
-        //     cout << "Space" << endl;
-        // }
-        // else if (data == '\n')
-        // {
-        //     cout << "Newline" << endl;
-        // }
-        // else
-        // {
-        //     cout << data << endl;
-        // }
         inputStream.push_back(data);
     }
 }
@@ -177,18 +164,10 @@ void convertHeader()
         {
             asciiCharacter = tokensHex[i];
             hexadecemilValues.insert(pair<string, string>(asciiCharacter, asciiCharacter));
-
-            // preConverted.push_back(asciiCharacter);
         }
 
         asciiHeader.push_back(asciiCharacter);
     }
-    // // Print
-    // for (auto character : asciiHeader)
-    // {
-    //     cout << character << ", ";
-    // }
-    // cout << endl;
 }
 
 int getHeaderColumn(char character)
@@ -199,52 +178,11 @@ int getHeaderColumn(char character)
         tmp += character;
         if (asciiHeader[i] == tmp)
         {
-            return i + 2; // Two offset since transistion table has is first row as terminal indicator and second as id
+            // Two offset since transistion table has is first row as terminal indicator and second as id
+            return i + 2;
         }
     }
     return -1;
-}
-
-void updateCounter(string token)
-{
-    for (auto &table : transitionTables)
-    {
-        if (table.token == token)
-        {
-            table.counter++;
-        }
-    }
-}
-
-void resetCounters()
-{
-    for (auto &table : transitionTables)
-    {
-        table.counter = 0;
-    }
-}
-
-void resetSingleCounter(string token)
-{
-    for (auto &table : transitionTables)
-    {
-        if (table.token == token)
-        {
-            table.counter = 0;
-        }
-    }
-}
-
-bool needsConversion(string character)
-{
-    for (auto preSet : preConverted)
-    {
-        if (preSet == character)
-        {
-            return false;
-        }
-    }
-    return true;
 }
 
 bool hasAlternative(string token)
@@ -285,37 +223,8 @@ void processSource(string outputFile)
             vector<string> &row = potentialTable.rows[potentialTable.currentRowId];
             if (row[column] != "E")
             {
-                // // Is a valid transistion check if its from a final row to a non final
-                // if (potentialTable.isFinal)
-                // {
-                //     if (row[0] == "+")
-                //     {
                 potentialTable.currentRowId = stoi(row[column]);
                 matchingList.push_front(potentialTable);
-                //         potentialTable.isFinal = true;
-                //         // Need to update the transistion table counter for this table
-                //         updateCounter(potentialTable.token);
-                //     }
-                //     else
-                //     {
-                //         resetSingleCounter(potentialTable.token);
-                //     }
-                // }
-                // else
-                // {
-                //     // Is a match update the current row id and add to matching list
-                //     potentialTable.currentRowId = stoi(row[column]);
-                //     if (potentialTable.rows[potentialTable.currentRowId][0] == "+")
-                //     {
-                //         potentialTable.isFinal = true;
-                //     }
-                //     else
-                //     {
-                //         potentialTable.isFinal = false;
-                //     }
-                //     matchingList.push_back(potentialTable);
-                //     updateCounter(potentialTable.token);
-                // }
 
                 // Check if next transition puts us in an accepting state
                 if (potentialTable.rows[potentialTable.currentRowId][0] == "+")
@@ -326,35 +235,10 @@ void processSource(string outputFile)
                     currentMatch.endingCharacterIndex = i;
                 }
             }
-            // else
-            // {
-            //     if (!potentialTable.isFinal)
-            //     {
-            //         // Not an option anymore
-            //         resetSingleCounter(potentialTable.token);
-            //     }
-            // }
         }
         if (matchingList.size() == 0 || (i == inputStream.size() - 1))
         {
-            // We found longest token
-            // Table longestTokenTable = masterList[0];
-            // cout << "Longest match: " << longestTokenTable.token << endl;
 
-            // Table longestTable;
-            // for (int i = transitionTables.size() - 1; i >= 0; i--)
-            // {
-            //     auto table = transitionTables[i];
-            //     if (table.counter >= longestTable.counter)
-            //     {
-            //         longestTable = table;
-            //     }
-            // }
-
-            // cout << "Longest match: " << longestTable.token << endl;
-
-            // resetCounters();
-            // masterList = transitionTables;
             int lineCounter = 1;
             for (int i = 0; i < currentMatch.startCharacterIndex; i++)
             {
@@ -371,22 +255,13 @@ void processSource(string outputFile)
             }
             tokenFile << currentMatch.key << " ";
             // cout << currentMatch.key << endl;
-            // Not hard coded but list of ones with alternatives
             if (!hasAlternative(currentMatch.key))
             {
                 for (int i = currentMatch.startCharacterIndex; i <= currentMatch.endingCharacterIndex; i++)
                 {
                     string tmp = "";
                     tmp += inputStream[i];
-                    // if (needsConversion(tmp))
-                    // {
-                    //     // Hex version
-                    //     cout << "x" << int(inputStream[i]);
-                    // }
-                    // else
-                    // {
-                    //     cout << inputStream[i];
-                    // }
+
                     tokenFile << hexadecemilValues[tmp];
                 }
             }
@@ -406,11 +281,6 @@ void processSource(string outputFile)
         {
             masterList = matchingList;
         }
-
-        // if (character == '\n')
-        // {
-        //     line++;
-        // }
     }
     tokenFile.close();
 }
